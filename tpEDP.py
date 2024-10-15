@@ -9,7 +9,7 @@
 # Metodos dentro de las apps:
 # Telefono: Realizar llamadas, recibir llamadas, terminar una llamada, ver historial
 # Contactos: Agendar y actualizar contactos (diccionario key: nro, value: nombre contacto)
-# SMS: Enviar y recibir mensajes a un nro, ver bandeja de entradas, eliminar mensajes (pilas, ultimo mensaje me parece lo mejor)
+# SMS: Enviar y recibir mensajes a un nro, ver bandeja de entradas (lista de tuplas), eliminar mensajes (pilas, ultimo mensaje me parece lo mejor)
 # Mail: Ver mails no leidos (Lista enlazada que se borran a medida que se leen) y por fecha (un sorted)
 # AppStore: Descargar una app
 # Configuracion: Cambiar nombre del telefono y codigo de desbloqueo, activar red movil (cuando el celular se encienda), desactivar red movil,  activar y desactivar datos
@@ -20,9 +20,4 @@
 # Metodos de la central: Verificar estado dispositivos, verificar que esten registrados, verificar estado dispositivos que quieran acceder a red, establecer y mediar la comunicacion, llevar un registro de las comunicaciones ()
 # Como guarda le central a los telefonos y sus estados? Diccionarios?
 
-
-
-class Aplicacion:
-    def __init__(self, nombre:str):
-        self.nombre=nombre
 

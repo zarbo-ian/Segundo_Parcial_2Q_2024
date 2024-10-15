@@ -4,15 +4,40 @@ class Aplicacion:
         #Los escenciales no se pueden eliminar
         self.escencial=escencial
         self.espacio=espacio
+        self.abierto = False
+
+    def abrirApp(self):
+        if not self.abierto:
+            self.abierto = True
+            print(f"Aplicación {self.nombre} abierta.")
+
+    def cerrar(self):
+        if self.abierta:
+            self.abierta = False
+            print(f"Aplicación {self.nombre} cerrada.")
+        
 
 class Telefono(Aplicacion):
     def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
         super().__init__(nombre, escencial, espacio, abierto)
 
 
+# DiccionarioChats guarda en clave otros celulares y en value una tupla compuesta por (Quien mando el mensaje, mensaje)
 class SMS(Aplicacion):
     def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
         super().__init__(nombre, escencial, espacio, abierto)
+        self.diccionarioChats={}
+    def enviarMensaje(self,numero,mensaje):
+        if numero not in self.diccionarioChats:
+            self.diccionarioChats[numero] = list(mensaje)
+        else:
+            self.diccionarioChats.get(numero).append((self.nombre,mensaje))
+
+    def recibirMensaje(self,celular,mensaje,remitente):
+        if celular not in self.diccionarioChats:
+            self.diccionarioChats[celular] = list(remitente,mensaje)
+        else:
+            self.diccionarioChats.get(celular).append((remitente,mensaje))
 
 
 class Mail(Aplicacion):
@@ -65,6 +90,5 @@ class AppStore(Aplicacion):
         super().__init__(nombre, escencial, espacio, abierto)
     def descargarAplicacion(self,celular,app):
         if app not in celular.aplicaciones:
-            
-
+            celular.aplicaciones.add(app)
 
