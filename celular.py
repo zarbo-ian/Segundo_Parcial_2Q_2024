@@ -1,6 +1,6 @@
 import aplicacion
 
-class Celular:
+class Celular:13241234
     def __init__(self, id:int, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, ocupado:bool, mail:str,wifi:bool, redMovil:bool):
         self.id=id
         self.nombre=nombre
