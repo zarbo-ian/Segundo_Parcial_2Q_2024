@@ -1,3 +1,5 @@
+#HACER MENU PARA TOD0
+
 # Funcionalidades de un telefono celular (ID,nombre,modelo,OS,version,RAM,almacenamiento,numero)
 
 # Metodos del celular:
@@ -21,3 +23,47 @@
 # Como guarda le central a los telefonos y sus estados? Diccionarios?
 
 
+def menu():
+    while True:
+        print("\n--- Menú Principal ---")
+        print("1. Enviar mensaje")
+        print("2. Recibir mensaje")
+        print("3. Llamar por teléfono")
+        print("4. Ver historial de llamadas")
+        print("5. Ver chats")
+        print("6. Salir")
+
+        opcion = input("Elige una opción: ")
+
+        if opcion == "1":
+            numero = input("Ingresa el número de teléfono: ")
+            mensaje = input("Escribe el mensaje: ")
+
+
+        elif opcion == "2":
+            celular = input("Ingresa tu número de celular: ")
+            remitente = input("Ingresa el nombre del remitente: ")
+            mensaje = input("Escribe el mensaje recibido: ")
+
+
+        elif opcion == "3":
+            numero = input("Ingresa el número al que deseas llamar: ")
+
+
+        elif opcion == "4":
+            print("\n--- Historial de Llamadas ---")
+
+
+        elif opcion == "5":
+            print("\n--- Chats ---")
+            
+
+        elif opcion == "6":
+            print("Saliendo del programa.")
+            break
+
+        else:
+            print("Opción no válida. Inténtalo de nuevo.")
+
+# Ejecutar el menú
+menu()
