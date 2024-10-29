@@ -1,11 +1,15 @@
 from aplicacion import SMS, Mail, Configuracion, AppStore, Telefono
-from central import Central
+#from central import Central   self.id=self.validarId(id)
 import numpy as np
+import csv
+from tpEDP import Interfaz
 
 
 class Celular:
-    def __init__(self, id:int, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, ocupado:bool, correo:str,wifi:bool, redMovil:bool):
-        self.id=self.validarId(id)
+    ids=set()
+    interfaz = Interfaz()
+    def __init__(self, id:int, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
+        self.id=id
         self.nombre=nombre
         self.modelo=modelo
         self.OS=OS
@@ -19,42 +23,72 @@ class Celular:
         self.correo=correo # direccion de correo personal asociado al celular
         self.wifi=wifi
         self.redMovil=redMovil #
-        self.registrado = False #el celular no esta registrado en un principio
-        self.sms=SMS('SMS',True,1)
-        self.mail=Mail('Mail',True,1)
-        self.configuracion=Configuracion('Configuracion',True,1)
-        self.appstore=AppStore('Appstore',True,1)
-        self.telefono = Telefono('Telefono',True,1)
-        self.aplicaciones={'SMS':self.sms, 'Mail':self.mail, 'Configuracion':self.configuracion, 'Appstore':self.appstore,'Telefono': self.telefono} # Todas las aplicaciones del celular
-        self.central=central1
+        #self.registrado = False #el celular no esta registrado en un principio
+        self.chatMensajes={}
+
+# Necesito que esten asi para probar cosas y que no salte error
+    #    self.sms=SMS('SMS',True,1)
+    #    self.mail=Mail('Mail',True,1)
+    #    self.configuracion=Configuracion('Configuracion',True,1)
+    #    self.appstore=AppStore('Appstore',True,1)
+    #    self.telefono = Telefono('Telefono',True,1)
+    #    self.aplicaciones={'SMS':self.sms, 'Mail':self.mail, 'Configuracion':self.configuracion, 'Appstore':self.appstore,'Telefono': self.telefono} # Todas las aplicaciones del celular
+       # self.central=central1 # Como hacemos que todos tengan la misma central??
         
 
+    def guardar_en_csv(self):
+        # Definir el nombre del archivo CSV
+        archivo_csv = "celulares.csv"
         
+        # Verificar si el archivo existe para agregar encabezados solo si es nuevo
+        try:
+            with open(archivo_csv, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                # Encabezado si el archivo es nuevo
+                if file.tell() == 0:
+                    writer.writerow(["ID", "Nombre", "Modelo", "OS", "RAM", "Almacenamiento", "Numero", "Prendido", "Bloqueado", "Contraseña", "Correo", "WiFi", "RedMovil"])
+                
+                # Escribir los datos del celular
+                writer.writerow([
+                    self.id, self.nombre, self.modelo, self.OS, self.RAM, self.almacenamiento,
+                    self.numero, self.prendido, self.bloqueado, self.contraseña, self.correo,
+                    self.wifi, self.redMovil
+                ])
+            print("Celular guardado en CSV correctamente.")
+        except Exception as e:
+            print(f"Error al guardar el celular en CSV: {e}")
+
+
 
     # Numero propio es el numero de la persona usando el celular
     def menu(self): #Este menú es del celular, las opciones que vería uno al interactuar con un celular, no el menú que nos permite seleccionar qué celular usar y esas cosas, eso es la clase Menu
         self.prendido = True #Esto es para asegurarse de que el valor se encuntre prendido, ya que puede estar apagado al instanciarse
-        self.numero_origen=numero
 
-        while self.prendido and self.desbloqueado:
+        while self.prendido and self.bloqueado:
             print("\n--- Aplicaciones ---")
             print("1. Mensajes")
-            print("2. Recibir mensaje")
-            print("3. Llamar por teléfono")
-            print("4. Ver historial de llamadas")
-            print("5. Ver chats")
-            print("6. Apagar")
+            print("2. Telefono")
+            print("3. Configuracion")
+            print("4. Mail")
+            print("5. Contactos")
+            print("6. Appstore")
 
             opcion = input("Elige una opción: ")
 
             if opcion == "1":
-                self.sms.menuSMS(self,self.central,self.numero)
+                sms=SMS()
+                sms.abrirApp()
+                sms.menuSMS(self.numero,self.central)
                 
             elif opcion == "2":
-                pass
+                tel = Telefono()
+                tel.abrirApp()
+                tel.menuLlamadas(self.central)
 
             elif opcion == "3":
-                numero = input("Ingresa el número al que deseas llamar: ")
+                config = Configuracion()
+                config.abrirApp()
+                config.menuConfig()
 
             elif opcion == "4":
                 print("\n--- Historial de Llamadas ---")
@@ -70,14 +104,7 @@ class Celular:
                 print("Opción no válida. Inténtalo de nuevo.")
 
         else:
-            print("Dispositivo apagado")
-            input("Presione Enter para prender el dispositivo:")
-            self.prenderApagar()
-            clave = input("Ingrese la contraseña para desbloquear el dispositivo: ")
-            while self.desbloquear(clave) == False:
-                clave = input("Ingrese la contraseña para desbloquear el dispositivo: ")
-            print("Dispositivo desbloqueado")
-            self.menu()
+            
 
 
     def validarId(id):
@@ -86,8 +113,8 @@ class Celular:
             return id
         else: raise ValueError('ya existe el id')
 
-    def registrar(self):
-        self.registrado = True
+    # def registrar(self):
+    #     self.registrado = True
 
     def prenderApagar(self): #un mismoo boton prende y apaga el celular
         if self.prendido: #Si está prendido se apaga
@@ -160,7 +187,6 @@ class Celular:
     def __eq__(self, value):
         return self.id == value.id
 
-central1=Central()
 
-
+#central1=Central()
 

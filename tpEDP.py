@@ -67,3 +67,34 @@ def menu():
 
 # Ejecutar el menú
 menu()
+
+
+# class Interfaz():
+
+#     def __init__(self) -> None:
+#         pass
+
+#     def gestionarLlamada(self, celular_origen, celular_destino,): #A este método se le debe alimentar un objeto de la clase Telemono, no celular
+#         if self.verificarDisponibilidad(celular_origen):
+#             if self.verificarDisponibilidad(celular_destino) and celular_destino.disponible:
+#                 print(f"Estableciendo llamada entre {celular_origen.numero} y {celular_destino.numero}.")
+#                 celular_destino.recibirLlamada(celular_origen.numero)
+#             else:
+#                 print('El numero al que se esta intentando llamar no esta disponible')
+#         else:
+#             print('El celular intentando llamar esta ocupado')
+
+#     def terminarllamada(self, celular_destino):
+#         print("La llamada se ha terminado")
+#         celular_destino.ocupado = False
+
+
+    # print("Dispositivo apagado")
+    # input("Presione Enter para prender el dispositivo:")
+    # self.prenderApagar()
+    ## HAY QUE ACTIVAR LA RED MOVIL!!
+    # clave = input("Ingrese la contraseña para desbloquear el dispositivo: ")
+    # while self.desbloquear(clave) == False:
+    #     clave = input("Ingrese la contraseña para desbloquear el dispositivo: ")
+    # print("Dispositivo desbloqueado")
+    # self.menu()
