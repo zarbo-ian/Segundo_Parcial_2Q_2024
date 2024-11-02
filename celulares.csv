@@ -1,13 +1,7 @@
-ID,Nombre,Modelo,OS,RAM,Almacenamiento,Numero,Prendido,Bloqueado,Contrase�a,Correo,WiFi,RedMovil
+ID,Nombre,Modelo,OS,RAM,Almacenamiento,Numero,Prendido,Bloqueado,Contraseña,Correo,WiFi,RedMovil
 1,1,1,1,1,1,1,False,True,1,1,False,True
 1,1,1,1,1,1,1,False,True,1,1,False,True
 2,2,2,2,2,2,2,False,True,2,2,False,True
 5,5,5,5,5,5,5,False,True,5,5,False,True
-
-
-
-
-
-esto no tiene nada q ver 
-#Cada linea de mi csv es un chat con un numero con este formato (nro,mensaje,nro,mensaje)
-como hago esto si cada celular tiene chats distintos
+6,6,6,6,6,6,6,False,True,6,6,False,True
+1,1,1,1,1,1,1,False,True,1,1,False,True

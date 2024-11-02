@@ -5,13 +5,13 @@ class Central:
         self.dispositivos_registrados = set()  # Diccionario de dispositivos registrados deberia ser un set
                                             # La key es el numero, el celular(objeto) es el dato
 
-    def registrarDispositivo(self,numeroCelular): #hay que cambiar todo porque tiene que getear del diccionario las cosas
-        if numeroCelular.numero not in self.dispositivos_registrados:
-            self.dispositivos_registrados[numeroCelular.numero] = numeroCelular
-            print(f"Teléfono {numeroCelular.numero} registrado en la red.")
-            numeroCelular.registrar()
+    def registrarDispositivo(self,idCelular,numeroCelular): #hay que cambiar todo porque tiene que getear del diccionario las cosas
+        if idCelular.numero not in self.dispositivos_registrados:
+            self.dispositivos_registrados[numeroCelular] = idCelular
+            print(f"Teléfono numero  registrado en la red.")
+            idCelular.registrar()
         else:
-            raise KeyError(f"El teléfono {numeroCelular.numero} ya está registrado.")
+            raise KeyError(f"El teléfono {idCelular.numero} ya está registrado.")
         
     def eliminarDispositivo(self, celular):
         if celular.numero in self.dispositivos_registrados:
@@ -28,7 +28,7 @@ class Central:
             print(f"El teléfono {celular.numero} no está disponible.")
             return False
 
-    def gestionarLlamada(self, celular_origen, celular_destino): #A este método se le debe alimentar un objeto de la clase Telemono, no celular
+    def gestionarLlamada(self, idcelular_origen,celular_origen,idcelular_destino, celular_destino): #necesita el id del celular y el numero de telefono
         if self.verificarDisponibilidad(celular_origen):
             if self.verificarDisponibilidad(celular_destino) and celular_destino.disponible:
                 print(f"Estableciendo llamada entre {celular_origen.numero} y {celular_destino.numero}.")
@@ -38,18 +38,26 @@ class Central:
         else:
             print('El celular intentando llamar esta ocupado')
 
-    def gestionarSms(self, celular_origen, celular_destino, mensaje): #A este método se le debe alimentar un objeto de la clase SMS, no celular
-        if celular_destino == 011: #los celulares se pueden registrar mensajeando al 011
+    def gestionarSms(self, idcelular_origen,celular_origen, celular_destino, mensaje): #A este método se le debe alimentar un objeto de la clase SMS, no celular
+        if celular_destino == 11: #los celulares se pueden registrar mensajeando al 011
             try:
-                self.registrarDispositivo(celular_origen)
+                self.registrarDispositivo(idcelular_origen,celular_origen)
             except KeyError as e:
                 print(e)
-        elif:
-            self.verificarDisponibilidad(celular_origen) and self.verificarDisponibilidad(celular_destino):
-            print(f"Enviando mensaje desde {celular_origen.numero} a {celular_destino.numero}.")
-            celular_destino.recibirMensaje(celular_origen.numero, mensaje)
+            else:
+                pass
+            finally:
+                pass
+        elif self.verificarDisponibilidad(celular_origen): 
+            if self.verificarDisponibilidad(celular_destino):
+                print(f"Enviando mensaje desde {celular_origen.numero} a {celular_destino.numero}.")
+                #aca deberia haber algo que cargue a la nube el mensaje, asi lo puede leer el celular destino al prender sms
+            else:
+                    print("El celular al que quiere contactar no esta registrado")
         else:
-            print("No se puede enviar el mensaje, uno o ambos dispositivos no están disponibles.")
+            pass
+            raise ValueError('el celular no esta registrado')
+        
 
     def gestionarMail(self, celular_origen, celular_destino, mensaje): #A este método se le debe alimentar un objeto de la clase Mail, no celular
         if self.verificarDisponibilidad(celular_origen) and self.verificarDisponibilidad(celular_destino):
@@ -60,19 +68,17 @@ class Central:
 
 # Verifica si ambos numeros estan registrados
     def verificarRegistroMensajes(self,celular_origen,numero_origen,numero_destino,mensaje):
-        if not :
-            print(f"El numero {numero_origen} no esta registrado")
-            return False
-        elif not self.verificarRegistro(numero_destino):
+        if numero_origen in self.dispositivos_registrados:
+            print(f"El numero {numero_origen} esta registrado")
+            return True
+        else:
             print(f"El numero {numero_destino} no esta registrado")
             return False
-        else:
-            pass
-            #celular_origen.sms.
+        
 
 # Verifica si los numeros estan registros
     def verificarRegistro(self,celular): #pasar el get del numero de telefono si se tiene solo el numero
-        if celular.verificarRegistrado():
+        if celular in self.dispositivos_registrados:
             return True
         else:
             return False

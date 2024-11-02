@@ -1,8 +1,6 @@
-
-from string import lower
 from celular import *
 import csv
-
+from collections import deque
 class Aplicacion:
     def __init__(self, nombre:str, escencial:bool, espacio:int, abierto:bool,instalada:bool):
         self.nombre=nombre
@@ -66,7 +64,7 @@ class Telefono(Aplicacion):
                             self.llamar(numero)
                         except ValueError as e:
                             print(e)
-                    elif lower(numero) == "cancelar":
+                    elif numero.lower == "cancelar":
                         intentar_llamar = False
                     else:
                         print("Numero no existe, intentelo de nuevo")
@@ -77,11 +75,12 @@ class Telefono(Aplicacion):
 
 # DiccionarioChats guarda en clave otros celulares y en value una tupla compuesta por (Quien mando el mensaje, mensaje)
 class SMS(Aplicacion): 
-    def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool,ocupado:bool,id:int):
+    def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool,ocupado:bool,id:int,numero:int):
         super().__init__(nombre, escencial, espacio, abierto)
-        self.diccionarioChats={}
+        self.diccionarioChats={} #DEBERIA SER UNA PILA CON TUPLAS (NUMERO,MENSAJE)
         self.nombre = 'SMS'
         self.id = id
+        self.numero = numero
     
     def menuSMS(self,numero_origen,central): #pasarle los datos necesarios telefono remitente etc
         continuar=True
@@ -90,38 +89,41 @@ class SMS(Aplicacion):
         while self.prendido and self.bloqueado:
             while continuar==True:
                 print("1. Mandar mensaje")
-                print("2. Ver Chats")
+                print("2. Ver chats")
+                print("3. Volver al menú anterior")
 
                 opcion = input("Elige una opción: ")
 
-                if opcion==1:
+                if opcion== "1":
                     numero_destino = input("Ingresa el número de teléfono: ")
                     mensaje = input("Escribe el mensaje: ")
                     self.enviarMensaje(numero_destino,mensaje)
                     
-                if opcion==2:
+                if opcion== "2":
                     self.verChats()
                     
-                if opcion==3:
+                if opcion== "3":
                     continuar=False
                     print("Has salido de mensajes")
                     self.cerrarApp()
                     self.cargarChats()
             #            self.central.verificarRegistroMensajes(celular_origen,numero_origen,numero_destino,mensaje)
 
-    def enviarMensaje(self,numero,mensaje):
-        if numero not in self.diccionarioChats.keys():
-            self.diccionarioChats[numero] = [(numero,mensaje)]
+    def enviarMensaje(self,idOrigen,numeroOrigen,numeroDestino,mensaje,central): #debe ser una pila
+        if numeroOrigen not in self.diccionarioChats.keys():
+            self.diccionarioChats[numeroOrigen] = deque()
+            self.diccionarioChats.get(numeroOrigen).append((numeroOrigen,mensaje))
+            central.gestionarSms(numeroOrigen)
         else:
-            self.diccionarioChats.get(numero).append((numero,mensaje))
+            self.diccionarioChats.get(numeroOrigen).append((numeroOrigen,mensaje))
         print(self.diccionarioChats)
 
-    def recibirMensaje(self,numero_remitente,numero_destinatario,mensaje):
-        if numero_remitente not in self.diccionarioChats:
-            self.diccionarioChats[numero_remitente] = [(numero_remitente,mensaje)]
-        else:
-            self.diccionarioChats.get(numero_remitente).append((numero_remitente,mensaje))
-        print(self.diccionarioChats)
+    # def recibirMensaje(self,numero_remitente,numero_destinatario,mensaje):
+    #     if numero_remitente not in self.diccionarioChats:
+    #         self.diccionarioChats[numero_remitente] = [(numero_remitente,mensaje)]
+    #     else:
+    #         self.diccionarioChats.get(numero_remitente).append((numero_remitente,mensaje))
+    #     print(self.diccionarioChats)
 
     def bajarChats(self): #carga automatica de el csv
         #with open csv:
@@ -140,15 +142,16 @@ class SMS(Aplicacion):
         except Exception:
             pass
     
-    
     def verChats(self):
         pass
 
 
 class Mail(Aplicacion):
-    def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
+    def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool, direccion: str):
         super().__init__(nombre, escencial, espacio, abierto)
         self.nombre = 'Mail'
+    
+    def enviar_mail(self, direccion):
 
 class Contacto(Aplicacion):
     def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
@@ -176,6 +179,26 @@ class Contacto(Aplicacion):
             raise ValueError('Este numero no esta agendado')
         else:
             self.diccionario.pop(numero)
+
+    def menuContacto(self):
+        continuar = True
+        while continuar:
+            print("\n----Menú de Configuracion---")
+            print("1. Agendar contacto")
+            print("2. Actualizar contacto")
+            print("3. Eliminar contacto")
+            print("4. Volver al menú anterior")
+            nav = input("Elige una opcion: ")
+            if nav == "1":
+                self.agendarContacto(input("Ingrese el número del contacto: "), input("Ingrese el nombre del contacto: "))
+            elif nav == "2":
+                self.actualizarContacto(input("Ingrese el número del contacto: "), input("Ingrese el nuevo nombre del contacto: "))
+            elif nav == "3":
+                self.eliminarContacto(input("Ingrese el numero del contacto: "))
+            elif nav == "4":
+                continuar = False
+            else:
+                print("Opción inválida")
 
 class Configuracion(Aplicacion):
     def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
@@ -211,9 +234,9 @@ class Configuracion(Aplicacion):
             print("4. Desactivar la red movil")
             print("5. Activar Wifi")
             print("6. Desactivar Wifi")
-            print("7. Volver al anterior")
+            print("7. Volver al menú anterior")
 
-            command = input()
+            command = input("Elige una opcion: ")
             if command == "1":
                 self.nombreTelefono()
             elif command == "2":
@@ -240,7 +263,7 @@ class Configuracion(Aplicacion):
                     print("El wifi ya está desactivado")
             elif command == "7":
                 continuar = False
-            else:print("Opcion invalida")
+            else:print("Opción inválida")
         
 
 class AppStore(Aplicacion):
@@ -249,4 +272,21 @@ class AppStore(Aplicacion):
     def descargarAplicacion(self,celular,app):
         if app not in celular.aplicaciones:
             celular.aplicaciones.add(app)
+        else:
+            print("Esta aplicación ya está descargada")
+
+    def menuApp(self, celular):
+        continuar = True
+        while continuar:
+            print("\n----Menú de Appstore---")
+            print("1. Descargar aplicacion")
+            print("2. Volver al menú anterior")
+            nav = input()
+            if nav == "1":
+                self.descargarAplicacion(celular, input("Ingrese una aplicación para descargar: "))
+            elif nav == "2":
+                continuar = False
+            else:
+                print("Opción inválida")
+                
 

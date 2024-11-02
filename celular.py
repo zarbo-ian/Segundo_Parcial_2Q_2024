@@ -1,13 +1,12 @@
-from aplicacion import SMS, Mail, Configuracion, AppStore, Telefono
+#from aplicacion import SMS, Mail, Configuracion, AppStore, Telefono
 #from central import Central   self.id=self.validarId(id)
 import numpy as np
 import csv
-from tpEDP import Interfaz
+#from tpEDP import Interfaz
 
 
 class Celular:
     ids=set()
-    interfaz = Interfaz()
     def __init__(self, id:int, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
         self.id=id
         self.nombre=nombre
@@ -104,7 +103,7 @@ class Celular:
                 print("Opción no válida. Inténtalo de nuevo.")
 
         else:
-            
+            pass
 
 
     def validarId(id):

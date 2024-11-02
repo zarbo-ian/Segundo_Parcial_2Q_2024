@@ -66,7 +66,7 @@ def menu():
             print("Opción no válida. Inténtalo de nuevo.")
 
 # Ejecutar el menú
-menu()
+# menu()
 
 
 # class Interfaz():
