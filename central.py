@@ -1,5 +1,5 @@
-from celular import * #esto deberia se al reves, el celular deberia importar la central
 
+import csv
 class Central:
     def __init__(self):
         self.dispositivos_registrados = set()  # Diccionario de dispositivos registrados deberia ser un set
@@ -9,7 +9,7 @@ class Central:
         if idCelular.numero not in self.dispositivos_registrados:
             self.dispositivos_registrados[numeroCelular] = idCelular
             print(f"Teléfono numero  registrado en la red.")
-            idCelular.registrar()
+            
         else:
             raise KeyError(f"El teléfono {idCelular.numero} ya está registrado.")
         
@@ -21,7 +21,7 @@ class Central:
             print(f"El teléfono {celular.numero} no está registrado.")
 
     def verificarDisponibilidad(self, celular):
-        if celular.numero in self.dispositivos_registrados and celular.prendido:
+        if celular.numero in self.dispositivos_registrados: #and celular.prendido:
             #print(f"El teléfono {celular.numero} está disponible.")
             return True
         else:
@@ -38,20 +38,22 @@ class Central:
         else:
             print('El celular intentando llamar esta ocupado')
 
-    def gestionarSms(self, idcelular_origen,celular_origen, celular_destino, mensaje): #A este método se le debe alimentar un objeto de la clase SMS, no celular
-        if celular_destino == 11: #los celulares se pueden registrar mensajeando al 011
+    def gestionarSms(self,numeroOrigen,idOrigen,numeroDestino,idDestino,mensaje): #A este método se le debe alimentar un objeto de la clase SMS, no celular
+        if numeroDestino == 11: #los celulares se pueden registrar mensajeando al 011
             try:
-                self.registrarDispositivo(idcelular_origen,celular_origen)
+                self.registrarDispositivo(idOrigen,numeroOrigen)
             except KeyError as e:
                 print(e)
-            else:
-                pass
-            finally:
-                pass
-        elif self.verificarDisponibilidad(celular_origen): 
-            if self.verificarDisponibilidad(celular_destino):
-                print(f"Enviando mensaje desde {celular_origen.numero} a {celular_destino.numero}.")
-                #aca deberia haber algo que cargue a la nube el mensaje, asi lo puede leer el celular destino al prender sms
+        elif self.verificarRegistro(numeroOrigen): 
+            if self.verificarRegistro(numeroDestino):
+                print(f"Enviando mensaje desde {numeroOrigen.numero} a {numeroDestino.numero}.")
+                try:
+                    with open('chats','w','UTF-8') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([str(idOrigen),str(idDestino),mensaje])
+                        pass
+                except FileNotFoundError('no se encontro el archivo de chats') as e:
+                    print(e)
             else:
                     print("El celular al que quiere contactar no esta registrado")
         else:
@@ -77,8 +79,8 @@ class Central:
         
 
 # Verifica si los numeros estan registros
-    def verificarRegistro(self,celular): #pasar el get del numero de telefono si se tiene solo el numero
-        if celular in self.dispositivos_registrados:
+    def verificarRegistro(self,idCelular): #pasar el get del numero de telefono si se tiene solo el numero
+        if idCelular in self.dispositivos_registrados:
             return True
         else:
             return False
