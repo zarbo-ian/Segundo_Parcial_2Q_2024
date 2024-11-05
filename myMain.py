@@ -62,7 +62,7 @@ class Main:
 
         # Crear y guardar la instancia del celular
         nuevo_celular = Celular(
-            id,Central(), nombre, modelo, OS, RAM, almacenamiento, numero, prendido, bloqueado, 
+            id,Central, nombre, modelo, OS, RAM, almacenamiento, numero, prendido, bloqueado, 
             contraseña, correo, wifi, redMovil
         )
         nuevo_celular.guardar_en_csv()
@@ -83,7 +83,7 @@ class Main:
                 lector=csv.reader(archivo)
                 next(lector)
                 for i in lector:
-                    celular = Celular(i[0], i[2], i[3], int(i[4]), int(i[5]), i[6], i[7] == "True", i[8] == "True", i[9], i[10], i[11] == "True", i[12] == "True",i[13])
+                    celular = Celular(i[0], i[1], i[2], i[3], int(i[4]), int(i[5]), i[6], i[7] == "True", i[8] == "True", i[9], i[10], i[11] == "True", i[12] == "True")
                     self.celulares[i[0]]=celular
         except:
             pass
