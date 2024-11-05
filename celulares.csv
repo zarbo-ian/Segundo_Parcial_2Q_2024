@@ -1,7 +1,2 @@
-ID,Nombre,Modelo,OS,RAM,Almacenamiento,Numero,Prendido,Bloqueado,Contraseña,Correo,WiFi,RedMovil
-1,1,1,1,1,1,1,False,True,1,1,False,True
-1,1,1,1,1,1,1,False,True,1,1,False,True
-2,2,2,2,2,2,2,False,True,2,2,False,True
-5,5,5,5,5,5,5,False,True,5,5,False,True
-6,6,6,6,6,6,6,False,True,6,6,False,True
-1,1,1,1,1,1,1,False,True,1,1,False,True
+ID,Nombre,Modelo,OS,RAM,Almacenamiento,Numero,Prendido,Bloqueado,Contrasena,Correo,WiFi,Red Movil
+<central.Central object at 0x000002297BA4E420>,1,1,1,1,1,1,False,True,1,1,False,False

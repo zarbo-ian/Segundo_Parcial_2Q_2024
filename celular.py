@@ -1,5 +1,6 @@
-#from aplicacion import SMS, Mail, Configuracion, AppStore, Telefono
-#from central import Central   self.id=self.validarId(id)
+from aplicacion import SMS, Mail, Configuracion, AppStore, Telefono, Contacto
+from central import Central
+from aplicacion import SMS
 import numpy as np
 import csv
 #from tpEDP import Interfaz
@@ -7,7 +8,7 @@ import csv
 
 class Celular:
     ids=set()
-    def __init__(self, id:int, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
+    def __init__(self,central, id:int, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
         self.id=id
         self.nombre=nombre
         self.modelo=modelo
@@ -16,22 +17,23 @@ class Celular:
         self.almacenamiento=almacenamiento #En GB, almacenamiento de fabrica
         self.almacenamientodisp= self.almacenamiento #En GB, almacenamiento disponible para aplicaciones no esenciales
         self.numero=numero
-        self.prendido=prendido
-        self.bloqueado=bloqueado
+        self.prendido=False
+        self.bloqueado=True
         self.contraseña=contraseña
         self.correo=correo # direccion de correo personal asociado al celular
-        self.wifi=wifi
-        self.redMovil=redMovil #
+        self.wifi=False
+        self.redMovil=False
         #self.registrado = False #el celular no esta registrado en un principio
         self.chatMensajes={}
+        self.central=central
 
-# Necesito que esten asi para probar cosas y que no salte error
-    #    self.sms=SMS('SMS',True,1)
-    #    self.mail=Mail('Mail',True,1)
-    #    self.configuracion=Configuracion('Configuracion',True,1)
-    #    self.appstore=AppStore('Appstore',True,1)
-    #    self.telefono = Telefono('Telefono',True,1)
-    #    self.aplicaciones={'SMS':self.sms, 'Mail':self.mail, 'Configuracion':self.configuracion, 'Appstore':self.appstore,'Telefono': self.telefono} # Todas las aplicaciones del celular
+        self.sms=SMS('SMS',True,1,False,self.id,self.numero,self.central)
+        self.mail=Mail('Mail',True,1,False,self.correo)
+        self.configuracion=Configuracion('Configuracion',True,1,False)
+        self.appstore=AppStore('Appstore',True,1,False)
+        self.telefono = Telefono('Telefono',True,1,False)
+        self.contacto = Contacto('Contactos',True,1,False)
+        self.aplicaciones={'SMS':self.sms, 'Mail':self.mail, 'Configuracion':self.configuracion, 'Appstore':self.appstore,'Telefono': self.telefono} # Todas las aplicaciones del celular
        # self.central=central1 # Como hacemos que todos tengan la misma central??
         
 
@@ -61,56 +63,124 @@ class Celular:
 
     # Numero propio es el numero de la persona usando el celular
     def menu(self): #Este menú es del celular, las opciones que vería uno al interactuar con un celular, no el menú que nos permite seleccionar qué celular usar y esas cosas, eso es la clase Menu
-        self.prendido = True #Esto es para asegurarse de que el valor se encuntre prendido, ya que puede estar apagado al instanciarse
 
-        while self.prendido and self.bloqueado:
-            print("\n--- Aplicaciones ---")
-            print("1. Mensajes")
-            print("2. Telefono")
-            print("3. Configuracion")
-            print("4. Mail")
-            print("5. Contactos")
-            print("6. Appstore")
-
-            opcion = input("Elige una opción: ")
-
-            if opcion == "1":
-                sms=SMS()
-                sms.abrirApp()
-                sms.menuSMS(self.numero,self.central)
-                
-            elif opcion == "2":
-                tel = Telefono()
-                tel.abrirApp()
-                tel.menuLlamadas(self.central)
-
-            elif opcion == "3":
-                config = Configuracion()
-                config.abrirApp()
-                config.menuConfig()
-
-            elif opcion == "4":
-                print("\n--- Historial de Llamadas ---")
-
-            elif opcion == "5":
-                print("\n--- Chats ---")
-            
-            elif opcion == "6":
-                print("Apagando dispositivo.")
-                self.prenderApagar()
-
+    #Si el celular no está prendido, pregunta si desea prenderlo        
+        if not self.prendido:
+            prender_celular=input("1. Prender\n2. Salir\n")
+            if prender_celular=="1":
+                self.prendido = True
+                print("Has prendido el celular")
             else:
-                print("Opción no válida. Inténtalo de nuevo.")
+                print("No se ha prendido el celular")
+                return
 
-        else:
+        if self.prendido:
+
+            #La variable continuar hace que el flujo sea constante y cuando se decide salir del celular, este se bloquea
+            continuar=True
+            while continuar:
+                print("\n1. Apagar celular")
+                print("2. Bloquear celular")
+                print("3. Acceder mediante contraseña")
+                eleccion=input("Elija una opcion: ")
+                if eleccion=="1":
+                    self.prenderApagar()
+                    print("Se ha apagado el celular")
+                    continuar=False
+
+                elif eleccion=="2":
+                    self.bloqueado=True
+                    print("Se ha bloqueado el celular")
+                    continuar=False
+                
+                elif eleccion=="3":
+
+                    # Intenta poner la contraseña hasta que decida salir
+                    intento_contraseña=True
+                    
+                    # Permite entrar a las Apps cuando se ponga la contraseña correcta
+                    permiso_aplicaciones=False
+
+                    while intento_contraseña:
+                        contraseña_puesta=input("Escriba su contraseña o toque ENTER para salir")
+                        if contraseña_puesta=="":
+                            intento_contraseña=False
+                        elif contraseña_puesta!=self.contraseña:
+                            print("Contraseña incorrecta, siga intentando")
+                        elif contraseña_puesta==self.contraseña:
+                            permiso_aplicaciones=True
+                            intento_contraseña=False
+                        
+                    while permiso_aplicaciones:
+                        print("\n--- Aplicaciones ---")
+                        print("1. Mensajes")
+                        print("2. Telefono")
+                        print("3. Configuracion")
+                        print("4. Mail")
+                        print("5. Contactos")
+                        print("6. Appstore")
+                        print("7. Salir")
+
+                        opcion = input("Elige una opción: ")
+
+                        if opcion == "1":
+                            if self.redMovil==False and self.wifi==False:
+                                print("Antes de acceder a esta App, prende su Red Movil o WIFI")
+                            else:
+                                self.sms.menuSMS(self,central1)
+                            
+                        elif opcion == "2":
+                            if self.redMovil==False and self.wifi==False:
+                                print("Antes de acceder a esta App, prende su Red Movil o WIFI")
+                            else:
+                                self.telefono.menuLlamadas(self)
+
+                        elif opcion == "3":
+                            self.configuracion.menuConfig(self)
+
+                        elif opcion == "4":
+                            if self.redMovil==False and self.wifi==False:
+                                print("Antes de acceder a esta App, prende su Red Movil o WIFI")
+                            else:
+                                self.mail.menuMail(self)
+                        
+                        elif opcion == "5":
+                            self.contacto.menuContacto(self)
+
+                        elif opcion == "6":
+                            if self.redMovil==False and self.wifi==False:
+                                print("Antes de acceder a esta App, prende su Red Movil o WIFI")
+                            else:
+                                self.appstore.menuApp
+                        
+                        elif opcion=="7":
+                            permiso_aplicaciones=False
+                        
+                        else:
+                            print("Esa opcion no es valida")
+                else:
+                    print("Opcion no valida")
+
+            print("Has salido")
+
+    @classmethod
+    def cargar_ids(self):
+        try:
+            with open('celulares.csv','r',newline='') as archivo:
+                lector=csv.reader(archivo)
+                next(lector)
+                for i in lector:
+                    self.ids.add(i[0])
+        except:
             pass
-
-
-    def validarId(id):
+        
+    @classmethod
+    def validarId(self,id):
         if id not in Celular.ids:
             Celular.ids.add(id)
-            return id
-        else: raise ValueError('ya existe el id')
+        else:
+            raise ValueError('No puede usar un id existente')
+
 
     # def registrar(self):
     #     self.registrado = True
@@ -179,6 +249,7 @@ class Celular:
             else: raise ValueError('no se puede desinstalar una aplicacion esencial')
         else:
             raise ValueError('La aplicacion no esta instalada') 
+        
     
     def __str__(self):
         return f'{self.nombre}, {self.id}'
@@ -187,5 +258,5 @@ class Celular:
         return self.id == value.id
 
 
-#central1=Central()
+central1=Central()
 
