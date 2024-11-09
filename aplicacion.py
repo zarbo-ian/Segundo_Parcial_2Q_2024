@@ -2,11 +2,11 @@ from celular import *
 import csv
 from collections import deque
 from central import *
+import time
 class Aplicacion:
-    def __init__(self,central, nombre:str, escencial:bool, espacio:int, abierto:bool):
+    def __init__(self,central, nombre:str, espacio:int, abierto:bool):
         self.nombre=nombre
         #Las aplicaciones escenciales no se pueden eliminar
-        self.escencial=escencial
         self.espacio=espacio
         self.abierto = abierto
         self.central = central
@@ -15,14 +15,14 @@ class Aplicacion:
     def abrirApp(self):
         if not self.abierto:
             self.abierto = True
-            print(f"Aplicación {self.nombre} abierta.")
+            print(f"Aplicacion {self.nombre} abierta.")
         else:
             raise ValueError("La aplicacion ya esta abierta")
 
     def cerrarApp(self): 
         if self.abierto:
             self.abierto = False
-            print(f"Aplicación {self.nombre} cerrada.")
+            print(f"Aplicacion {self.nombre} cerrada.")
         else:
             raise ValueError('La aplicacion ya esta cerrada')
         
@@ -33,73 +33,70 @@ class Telefono(Aplicacion):
         self.ocupado = False
         self.numero = numero
         self.central = central
-    
-    def llamar(self,numeroOrigen,numeroDestino,mensaje):
+        self.historial = deque()
+
+    def llamar(self,numeroDestino):
         if self.ocupado == False:
-            if numeroDestino.ocupado == False:
-                self.ocupado = True    
+            if self.central.verificarRegistro(numeroDestino):
+                self.ocupado = True
+                inicio = time.time() 
                 input("Cuando quiera terminar la llamada oprima Enter:")
-                self.ocupado = False
-             #   otroTelefono.ocupado = False
-            else:print('Este telefono no esta disponible')
+                final = time.time()
+                tiempoTranscurrido = final - inicio
+                print(f'tiempo transcurrido en llamada {tiempoTranscurrido}')
+                self.central.gestionarLlamada(self.numero,numeroDestino,tiempoTranscurrido)
+                self.historial.append((self.numero,numeroDestino,tiempoTranscurrido))
+                self.cortar()
+            else:print('El telefono al que intenta llamar no esta registrado')
         else:
-            raise ValueError('El telefono ya esta en llamada')
+            raise ValueError('Este telefono no esta registrado')
     
-    # def enviarMensaje(self,numeroOrigen,numeroDestino,mensaje):
-    #     if not numeroOrigen:
-    #         numeroValido = False
-    #         while not numeroValido:
-    #             try:
-    #                 numeroOrigen = int(input('ingrese un numero de celular'))
-    #                 numeroValido = True
-    #             except ValueError('ingrese un numero correcto, solo digitos del 0-9 y llame al 11') as e:
-    #                 print(e)
-    #             else:
-    #                 if numeroDestino != 11:
-    #                     numeroValido = False
-    #                     print('debe registrar su dispositivo enviando un mensaje al 11')
-    #     elif numeroDestino not in self.chats:
-    #         self.bandeja = deque()
-    #         self.bandeja.append((str(numeroOrigen),str(numeroDestino),mensaje))
-    #         self.chats[numeroDestino]= self.bandeja
-    #         self.central.gestionarSms(numeroOrigen,numeroDestino,mensaje)
-    #     else:
-    #         self.chats.get(numeroDestino).append((str(numeroOrigen),str(numeroDestino),mensaje))
-    #         self.central.gestionarSms(numeroOrigen,numeroDestino,numeroDestino,mensaje)
-    #     print(self.chats)
-    def recibirLlamada(self, otroTelefono):
-        self.ocupado = True
+    def verificarDisponibilidad(self):
+        if self.ocupado == False:
+            return True
     
-    def cortar(self, otroTelefono):
+    def cortar(self):
         self.ocupado = False
+    
+    def verLlamadas(self):
+        self.historial = self.central.leerLlamadas(self.numero)
+        self.historialCopia = self.bandeja.copy()
+        while self.historialCopia:
+            tupla = self.historialCopia.pop()
+            numeroOrigen = tupla[0]
+            numeroDestino = tupla[1]
+            duracion = tupla[2]
+            if numeroOrigen == self.numero:
+                print(f'realizaste una llamada al numero{numeroDestino} con duracion {duracion}')
+            else:
+                print(f'recibiste una llamada del numero {numeroDestino} con duracion{duracion}')
 
     def menuLlamadas(self, central):
         self.abrirApp()
         continuar = True
         while continuar:
-            print("\n--- Menú de Telefono ---")
+            print("\n--- Menu de Telefono ---")
             print("1. Realizar llamada")
-            print("2. Volver")
-            opcion = input("Seleccione una opción: ")
+            print('2. Ver historial de llamadas')
+            print("3. Volver")
+            opcion = input("Seleccione una opcion: ")
             if opcion == "1":
                 intentar_llamar = True
                 while intentar_llamar:
-                    print('Ingrese un número telefónico para llamar, o escriba "cancelar" para volver al menú anterior')
-                    numero = input()
-                    if central.dispositivos_registrados.get(numero) != None:
-                        try:
-                            self.llamar(numero)
-                        except ValueError as e:
-                            print(e)
-                    elif numero.lower == "cancelar":
-                        intentar_llamar = False
-                    else:
-                        print("Numero no existe, intentelo de nuevo")
-            elif opcion == "2":
+                    print('Ingrese un numero telefonico para llamar, o escriba "cancelar" para volver al menu anterior')
+                    numeroDestino = input()
+                    try:
+                        self.llamar(numeroDestino)
+                    except ValueError as e:
+                        print(e)
+            elif opcion == '2':
+                self.verLlamadas()
+                pass
+            elif opcion == "3":
                 continuar = False
                 self.cerrarApp()
             else:
-                print("Opción inválida. Intente de nuevo.")
+                print("Opcion invalida. Intente de nuevo.")
 
 # DiccionarioChats guarda en clave otros celulares y en value una tupla compuesta por (Quien mando el mensaje, mensaje)
 class SMS(Aplicacion): 
@@ -118,12 +115,12 @@ class SMS(Aplicacion):
         while continuar==True:
             print("1. Mandar mensaje")
             print("2. Ver chats")
-            print("3. Volver al menú anterior")
+            print("3. Volver al menu anterior")
 
-            opcion = input("Elige una opción: ")
+            opcion = input("Elige una opcion: ")
 
             if opcion== "1":
-                numero_destino = input("Ingresa el número de teléfono: ")
+                numero_destino = input("Ingresa el numero de telefono: ")
                 mensaje = input("Escribe el mensaje: ")
                 self.enviarMensaje(self.numero,numero_destino,mensaje,self.central)
                 
@@ -142,14 +139,14 @@ class SMS(Aplicacion):
             numeroValido = False
             while not numeroValido:
                 try:
-                    numeroOrigen = int(input('ingrese un numero de celular'))
+                    numeroOrigen = int(input('Ingrese un numero de celular'))
                     numeroValido = True
-                except ValueError('ingrese un numero correcto, solo digitos del 0-9 y llame al 11') as e:
+                except ValueError('Ingrese un numero correcto, solo digitos del 0-9 y llame al 11') as e:
                     print(e)
                 else:
                     if numeroDestino != 11:
                         numeroValido = False
-                        print('debe registrar su dispositivo enviando un mensaje al 11')
+                        print('Debe registrar su dispositivo enviando un mensaje al 11')
         elif numeroDestino not in self.chats:
             self.bandeja = deque()
             self.bandeja.append((str(numeroOrigen),str(numeroDestino),mensaje))
@@ -159,24 +156,6 @@ class SMS(Aplicacion):
             self.chats.get(numeroDestino).append((str(numeroOrigen),str(numeroDestino),mensaje))
             self.central.gestionarSms(numeroOrigen,numeroDestino,numeroDestino,mensaje)
         print(self.chats)
-        
-
-    #def bajarChats(self,central): #carga automatica de el csv al celular de sus mensajes por chat
-        #self.chats = central.leerSms(self.numero)
-        
-            
-    
-    # def cargarChats(self):    
-    #     try:
-    #         with open('chats', mode='a', newline='') as file:
-    #             writer = csv.writer(file)
-    #             # Encabezado si el archivo es nuevo
-    #             chatsCopia = self.chats.copy
-    #             while chatsCopia:
-    #                 elemento = self.chatsCopia.pop()
-    #                 writer.writerow[str(self.id),str(elemento[1]),str(elemento[2]),str(elemento[3])]       
-    #     except FileNotFoundError('No se encontro el archivo') as e:
-    #         print(e)
     
     def verChats(self):
         self.chats = self.central.leerSms(self.numero)
@@ -233,7 +212,7 @@ class Mail(Aplicacion):
         self.mensaje = input("Redacte el contenido del mensaje: ")
         opcion_invalida = True
         while opcion_invalida:
-            opcion = input("¿El mail es urgente? (Y/N): ")
+            opcion = input("El mail es urgente? (Y/N): ")
             if opcion.lower == "y":
                 self.escencial = True
                 opcion_invalida = False
@@ -249,15 +228,15 @@ class Mail(Aplicacion):
         self.abrirApp()
         continuar = True
         while continuar:
-            print("\n--- Menú de Mail ---")
+            print("\n--- Menu de Mail ---")
             print("1. Redactar mensaje")
             print("2. Ver tablero de entrada")
-            print("3. Volver al menú anterior")
-            nav = input("Elija una opción: ")
+            print("3. Volver al menu anterior")
+            nav = input("Elija una opciun: ")
             if nav == "1":
                 self.redactar_mail(central)
             elif nav == "2":
-                print("Ver mensajes según: \n1. No leídos primero\n2. Por fecha")
+                print("Ver mensajes segun: \n1. No leidos primero\n2. Por fecha")
                 opcion = input("Elija una opcion: ")
                 if opcion == "1":
                     self.recibidos_no_leidos, self.recibidos_leidos = self.central.visualizar_mails_leidos()
@@ -270,7 +249,7 @@ class Mail(Aplicacion):
                     for i in self.recibidos:
                         print(i)
                 else:
-                    print("Opcion inválida")
+                    print("Opcion invalida")
             elif nav == "3":
                 continuar = False
             else:
@@ -300,7 +279,7 @@ class Contacto(Aplicacion):
             self.contactos[celular].append((numero,nombre))
 
 # Elimina el contacto de diccionario
-    def eliminarContacto(self,numero):
+    def eliminarContacto(self,numero,celular):
         if numero not in self.contactos.keys():
             raise ValueError('Este numero no esta agendado')
         else:
@@ -310,16 +289,16 @@ class Contacto(Aplicacion):
         self.abrirApp()
         continuar = True
         while continuar:
-            print("\n----Menú de Contacto---")
+            print("\n----Menu de Contacto---")
             print("1. Agendar contacto")
             print("2. Actualizar contacto")
             print("3. Eliminar contacto")
-            print("4. Volver al menú anterior")
+            print("4. Volver al menu anterior")
             nav = input("Elige una opcion: ")
             if nav == "1":
-                self.agendarContacto(celular,input("Ingrese el número del contacto: "), input("Ingrese el nombre del contacto: "))
+                self.agendarContacto(celular,input("Ingrese el numero del contacto: "), input("Ingrese el nombre del contacto: "))
             elif nav == "2":
-                self.actualizarContacto(celular,input("Ingrese el número del contacto: "), input("Ingrese el nuevo nombre del contacto: "))
+                self.actualizarContacto(celular,input("Ingrese el numero del contacto: "), input("Ingrese el nuevo nombre del contacto: "))
             elif nav == "3":
                 self.eliminarContacto(celular,input("Ingrese el numero del contacto: "))
             elif nav == "4":
@@ -336,7 +315,7 @@ class Contacto(Aplicacion):
                         escritor.writerow([celular,numero])
                 self.cerrarApp()
             else:
-                print("Opción inválida")
+                print("Opcion invalida")
 
 class Configuracion(Aplicacion):
     def __init__(self, nombre: str, central:object, escencial: bool, espacio: int, abierto: bool):
@@ -346,69 +325,69 @@ class Configuracion(Aplicacion):
     def cambiarNombreTelefono(self,celular):
         try:
             nuevo_nombre = input("Ingrese el nuevo nombre del dispositivo: ")
-            if nuevo_nombre.strip():  # Verifica que no esté vacío
+            if nuevo_nombre.strip():  # Verifica que no este vacio
                 celular.nombre = nuevo_nombre
                 print(f"Nombre cambiado exitosamente a: {nuevo_nombre}")
             else:
-                print("Error: El nombre no puede estar vacío")
+                print("Error: El nombre no puede estar vacio")
         except Exception as e:
             print(f"Error al cambiar el nombre: {e}")
 
     def cambiarCodigoDesbloqueo(self,celular):
         try:
-            codigo_actual = input("Ingrese el código actual: ")
-            if codigo_actual == celular.contraseña:
-                nuevo_codigo = input("Ingrese el nuevo código: ")
-                celular.contraseña = nuevo_codigo
-                print("Código cambiado exitosamente")
+            codigo_actual = input("Ingrese el codigo actual: ")
+            if codigo_actual == celular.contrasenia:
+                nuevo_codigo = input("Ingrese el nuevo codigo: ")
+                celular.contrasenia = nuevo_codigo
+                print("Codigo cambiado exitosamente")
             else:
-                print("Error: Código actual incorrecto")
+                print("Error: Codigo actual incorrecto")
         except ValueError:
-            print("Error: El código debe ser un número")
+            print("Error: El codigo debe ser un numero")
 
     def activarRedMovil(self, celular, central):
         if central.verificar_registro(celular.id):
             if not celular.redMovil:
                 celular.redMovil = True
-                print("Red móvil activada")
+                print("Red movil activada")
         else:
-            print("La red móvil ya está activa")
+            print("La red movil ya esta activa")
             
     def desactivarRedMovil(self, celular, central):
         if central.verificar_registro(self.id):
             if celular.redMovil:
                 celular.redMovil = False
-                print("Red móvil desactivada")
+                print("Red movil desactivada")
         else:
-            print("La red móvil ya está desactivada")
+            print("La red movil ya esta desactivada")
  
     def activarWifi(self,celular):
         if not celular.wifi:
             celular.wifi = True
             print("WiFi activado")
         else:
-            print("El WiFi ya está activo")
+            print("El WiFi ya esta activo")
    
     def desactivarWifi(self,celular):
         if celular.wifi:
                 celular.wifi = False
                 print("WiFi desactivado")
         else:
-                print("El WiFi ya está desactivado")
+                print("El WiFi ya esta desactivado")
 
 
     def menuConfig(self,celular):
         continuar = True
         self.abrirApp()
         while continuar:
-            print("\n----Menú de Configuracion---")
+            print("\n----Menu de Configuracion---")
             print("1. Cambiar nombre del telefono")
-            print("2. Cambiar código de desbloqueo")
+            print("2. Cambiar codigo de desbloqueo")
             print("3. Activar la red movil")
             print("4. Desactivar la red movil")
             print("5. Activar Wifi")
             print("6. Desactivar Wifi")
-            print("7. Volver al menú anterior")
+            print("7. Volver al menu anterior")
 
             command = input("Elige una opcion: ")
             if command == "1":
@@ -417,28 +396,28 @@ class Configuracion(Aplicacion):
                 self.cambiarCodigoDesbloqueo(celular)
             elif command == "3":
                 if celular.redMovil:
-                    print("La red movil ya está activada")
+                    print("La red movil ya esta activada")
                 else:
                     self.activarRedMovil(celular)
             elif command == "4":
                 if celular.redMovil:
                     self.desactivarRedMovil(celular)
                 else:
-                    print("La red movil ya está desactivada")
+                    print("La red movil ya esta desactivada")
             elif command == "5":
                 if celular.wifi:
-                    print("El wifi ya está activado")
+                    print("El wifi ya esta activado")
                 else:
                     self.activarWifi(celular)
             elif command == "6":
                 if celular.wifi:
                     self.desactivarWifi(celular)
                 else:
-                    print("El wifi ya está desactivado")
+                    print("El wifi ya esta desactivado")
             elif command == "7":
                 continuar = False
                 self.cerrarApp()
-            else:print("Opción inválida")
+            else:print("Opcion invalida")
         
 
 class AppStore(Aplicacion):
@@ -448,23 +427,23 @@ class AppStore(Aplicacion):
         if app not in celular.aplicaciones:
             celular.aplicaciones.add(app)
         else:
-            print("Esta aplicación ya está descargada")
+            print("Esta aplicacion ya esta descargada")
 
     def menuApp(self, celular):
         continuar = True
         self.abrirApp()
         while continuar:
-            print("\n----Menú de Appstore---")
+            print("\n----Menu de Appstore---")
             print("1. Descargar aplicacion")
-            print("2. Volver al menú anterior")
+            print("2. Volver al menu anterior")
             nav = input()
             if nav == "1":
-                self.descargarAplicacion(celular, input("Ingrese una aplicación para descargar: "))
+                self.descargarAplicacion(celular, input("Ingrese una aplicacion para descargar: "))
             elif nav == "2":
                 continuar = False
                 self.cerrarApp()
             else:
-                print("Opción inválida")
+                print("Opcion invalida")
                 
 
 

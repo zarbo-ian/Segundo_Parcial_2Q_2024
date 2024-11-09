@@ -1,6 +1,5 @@
 from aplicacion import SMS, Mail, Configuracion, AppStore, Telefono, Contacto
 from central import Central
-from aplicacion import SMS
 import numpy as np
 import csv
 #from tpEDP import Interfaz
@@ -8,7 +7,7 @@ import csv
 
 class Celular:
     ids=set()
-    def __init__(self, id:int, central, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
+    def __init__(self, id:int, central, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contrasenia: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
         self.id=id
         self.nombre=nombre
         self.modelo=modelo
@@ -19,7 +18,7 @@ class Celular:
         self.numero=None
         self.prendido=False
         self.bloqueado=True
-        self.contraseña=contraseña
+        self.contrasenia=contrasenia
         self.correo=correo # direccion de correo personal asociado al celular
         self.wifi=False
         self.redMovil=False
@@ -28,14 +27,14 @@ class Celular:
         self.central=central
         self.contactos={}
 
-        self.sms=SMS(self.central,'SMS',True,1,False,self.numero)
-        self.mail=Mail(self.central,'Mail',True,1,False,self.correo)
-        self.configuracion=Configuracion('Configuracion',Central(),True,1,False)
-        self.appstore=AppStore('Appstore',Central(),True,1,False)
-        self.telefono = Telefono('Telefono',Central(),True,1,False)
-        self.contacto = Contacto('Contactos',Central(),True,1,False)
+        self.sms=SMS(self.central,'SMS',1,False,self.numero)
+        self.mail=Mail(self.central,'Mail',1,False,self.correo)
+        self.configuracion=Configuracion('Configuracion',Central(),True,1,False) #en realidad deberian instanciarse con la misma central
+        self.appstore=AppStore('Appstore',Central(),1,False)
+        self.telefono = Telefono('Telefono',Central(),1,False)
+        self.contacto = Contacto('Contactos',Central(),1,False)
         self.aplicaciones={'SMS':self.sms, 'Mail':self.mail, 'Configuracion':self.configuracion, 'Appstore':self.appstore,'Telefono': self.telefono} # Todas las aplicaciones del celular
-       # self.central=central1 # Como hacemos que todos tengan la misma central??
+
         
 
     def guardar_en_csv(self):
@@ -48,12 +47,12 @@ class Celular:
                 writer = csv.writer(file)
                 # Encabezado si el archivo es nuevo
                 if file.tell() == 0:
-                    writer.writerow(["ID", "Nombre", "Modelo", "OS", "RAM", "Almacenamiento", "Numero", "Prendido", "Bloqueado", "Contraseña", "Correo", "WiFi", "RedMovil"])
+                    writer.writerow(["ID", "Nombre", "Modelo", "OS", "RAM", "Almacenamiento", "Numero", "Prendido", "Bloqueado", "Contrasenia", "Correo", "WiFi", "RedMovil"])
                 
                 # Escribir los datos del celular
                 writer.writerow([
                     self.id, self.nombre, self.modelo, self.OS, self.RAM, self.almacenamiento,
-                    self.numero, self.prendido, self.bloqueado, self.contraseña, self.correo,
+                    self.numero, self.prendido, self.bloqueado, self.contrasenia, self.correo,
                     self.wifi, self.redMovil
                 ])
             print("Celular guardado en CSV correctamente.")
@@ -63,9 +62,9 @@ class Celular:
 
 
     # Numero propio es el numero de la persona usando el celular
-    def menu(self): #Este menú es del celular, las opciones que vería uno al interactuar con un celular, no el menú que nos permite seleccionar qué celular usar y esas cosas, eso es la clase Menu
+    def menu(self): #Este menu es del celular, las opciones que veria uno al interactuar con un celular, no el menu que nos permite seleccionar que celular usar y esas cosas, eso es la clase Menu
 
-    #Si el celular no está prendido, pregunta si desea prenderlo        
+    #Si el celular no esta prendido, pregunta si desea prenderlo        
         if not self.prendido:
             prender_celular=input("1. Prender\n2. Salir\n")
             if prender_celular=="1":
@@ -82,7 +81,7 @@ class Celular:
             while continuar:
                 print("\n1. Apagar celular")
                 print("2. Bloquear celular")
-                print("3. Acceder mediante contraseña")
+                print("3. Acceder mediante contrasenia")
                 eleccion=input("Elija una opcion: ")
                 if eleccion=="1":
                     self.prenderApagar()
@@ -96,21 +95,21 @@ class Celular:
                 
                 elif eleccion=="3":
 
-                    # Intenta poner la contraseña hasta que decida salir
-                    intento_contraseña=True
+                    # Intenta poner la contrasenia hasta que decida salir
+                    intento_contrasenia=True
                     
-                    # Permite entrar a las Apps cuando se ponga la contraseña correcta
+                    # Permite entrar a las Apps cuando se ponga la contrasenia correcta
                     permiso_aplicaciones=False
 
-                    while intento_contraseña:
-                        contraseña_puesta=input("Escriba su contraseña o toque ENTER para salir")
-                        if contraseña_puesta=="":
-                            intento_contraseña=False
-                        elif contraseña_puesta!=self.contraseña:
-                            print("Contraseña incorrecta, siga intentando")
-                        elif contraseña_puesta==self.contraseña:
+                    while intento_contrasenia:
+                        contrasenia_puesta=input("Escriba su contrasenia o toque ENTER para salir")
+                        if contrasenia_puesta=="":
+                            intento_contrasenia=False
+                        elif contrasenia_puesta!=self.contrasenia:
+                            print("Contrasenia incorrecta, intente de vuelta")
+                        elif contrasenia_puesta==self.contrasenia:
                             permiso_aplicaciones=True
-                            intento_contraseña=False
+                            intento_contrasenia=False
                         
                     while permiso_aplicaciones:
                         print("\n--- Aplicaciones ---")
@@ -122,7 +121,7 @@ class Celular:
                         print("6. Appstore")
                         print("7. Salir")
 
-                        opcion = input("Elige una opción: ")
+                        opcion = input("Elige una opcion: ")
 
                         if opcion == "1":
                             if self.redMovil==False and self.wifi==False:
@@ -187,11 +186,11 @@ class Celular:
     #     self.registrado = True
 
     def prenderApagar(self): #un mismoo boton prende y apaga el celular
-        if self.prendido: #Si está prendido se apaga
+        if self.prendido: #Si esta prendido se apaga
             self.prendido = False
-        else: #Si está apagado se prende
+        else: #Si esta apagado se prende
             self.prendido = True
-            self.bloquear() #despues de prender el celular hay que reingresar la contraseña
+            self.bloquear() #despues de prender el celular hay que reingresar la contrasenia
             self.ocupado = False
 
             #cuando se prenda debe activarse la red movil
@@ -202,11 +201,11 @@ class Celular:
     
     def desbloquear(self, pass_given):
         if self.bloqueado:
-            if pass_given==self.contraseña:
+            if pass_given==self.contrasenia:
                 self.bloqueado=False
-                return True #Retorna true o flase para el momento de implementarlo en el menú
+                return True #Retorna true o flase para el momento de implementarlo en el menu
             else:
-                print("Contraseña incorrecta, vuelve a intentarlo")
+                print("Contrasenia incorrecta, vuelve a intentarlo")
                 return False
         else:
             raise Exception('El telefono ya estaba desbloqueado')

@@ -12,14 +12,14 @@ class Main:
         Celular.cargar_ids()
     
     def mostrar_menu(self):
-        "Muestra el menú principal del programa y gestiona las opciones."
+        "Muestra el menu principal del programa y gestiona las opciones."
         while True:
-            print("\n--- Menú Principal ---")
-            print("1. Añadir un nuevo celular")
+            print("\n--- Menu Principal ---")
+            print("1. Aniadir un nuevo celular")
             print("2. Acceder a un celular existente")
             print("3. Salir")
             
-            opcion = input("Seleccione una opción: ")
+            opcion = input("Seleccione una opcion: ")
             if opcion == "1":
                 self.agregar_celular()
             elif opcion == "2":
@@ -35,16 +35,16 @@ class Main:
                     escritor=csv.writer(archivo)
                     escritor.writerow(['ID', 'Nombre', 'Modelo', 'OS', 'RAM', 'Almacenamiento','Numero', 'Prendido', 'Bloqueado', 'Contrasena','Correo', 'WiFi', 'Red Movil'])
                     for celular in self.celulares.values():
-                        escritor.writerow([celular.id,celular.central, celular.nombre,celular.modelo,celular.OS,celular.RAM,celular.almacenamiento,celular.numero,celular.prendido,celular.bloqueado,celular.contraseña,celular.correo,celular.wifi,celular.redMovil])
+                        escritor.writerow([celular.id,celular.central, celular.nombre,celular.modelo,celular.OS,celular.RAM,celular.almacenamiento,celular.numero,celular.prendido,celular.bloqueado,celular.contrasenia,celular.correo,celular.wifi,celular.redMovil])
                         print(celular.wifi)
 
                 print("Saliendo del programa.")
                 return
             else:
-                print("Opción inválida. Intente de nuevo.")
+                print("Opcion invalida. Intente de nuevo.")
 
     def agregar_celular(self):
-        "Solicita datos al usuario para añadir un nuevo celular y lo guarda en el CSV."
+        "Solicita datos al usuario para aniadir un nuevo celular y lo guarda en el CSV."
         id = input("ID: ")
         Celular.validarId(id)
         nombre = input("Ingrese el nombre del celular: ")
@@ -52,29 +52,29 @@ class Main:
         OS = input("Ingrese el sistema operativo (OS): ")
         RAM = int(input("Ingrese la RAM en GB: "))
         almacenamiento = int(input("Ingrese el almacenamiento en GB: "))
-        numero = input("Ingrese el número de teléfono: ")
+        numero = input("Ingrese el numero de telefono: ")
         prendido = False
         bloqueado = True
-        contraseña = input("Ingrese la contraseña del celular: ")
-        correo = input("Ingrese el correo electrónico asociado: ")
+        contrasenia = input("Ingrese la contrasenia del celular: ")
+        correo = input("Ingrese el correo electronico asociado: ")
         wifi = False
         redMovil = True
 
         # Crear y guardar la instancia del celular
         nuevo_celular = Celular(
             id, self.central, nombre, modelo, OS, RAM, almacenamiento, numero, prendido, bloqueado, 
-            contraseña, correo, wifi, redMovil
+            contrasenia, correo, wifi, redMovil
         )
         nuevo_celular.guardar_en_csv()
         self.celulares[id] = nuevo_celular
-        print("Celular añadido y guardado en CSV.")
+        print("Celular aniadido y guardado en CSV.")
     
     def guardar_en_csv(self):
         with open("celulares.csv",mode="a",newline='') as  archivo:
             escritor=csv.writer(archivo)
-            if archivo.tell() == 0:  # Verifica si el archivo está vacío
+            if archivo.tell() == 0:  # Verifica si el archivo esta vacio
                 escritor.writerow(['ID', 'Nombre', 'Modelo', 'OS', 'RAM', 'Almacenamiento','Numero', 'Prendido', 'Bloqueado', 'Contrasena','Correo', 'WiFi', 'Red Movil'])
-            escritor.writerow([self.id, self.nombre, self.modelo, self.OS, self.RAM, self.almacenamiento, self.numero, self.prendido, self.bloqueado, self.contraseña, self.correo, self.wifi, self.redMovil])
+            escritor.writerow([self.id, self.nombre, self.modelo, self.OS, self.RAM, self.almacenamiento, self.numero, self.prendido, self.bloqueado, self.contrasenia, self.correo, self.wifi, self.redMovil])
 
     def cargar_celulares_csv(self):
         try:

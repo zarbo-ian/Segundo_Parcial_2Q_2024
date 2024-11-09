@@ -25,29 +25,29 @@
 
 def menu():
     while True:
-        print("\n--- Menú Principal ---")
+        print("\n--- Menu Principal ---")
         print("1. Enviar mensaje")
         print("2. Recibir mensaje")
-        print("3. Llamar por teléfono")
+        print("3. Llamar por telefono")
         print("4. Ver historial de llamadas")
         print("5. Ver chats")
         print("6. Salir")
 
-        opcion = input("Elige una opción: ")
+        opcion = input("Elige una opcion: ")
 
         if opcion == "1":
-            numero = input("Ingresa el número de teléfono: ")
+            numero = input("Ingresa el numero de telefono: ")
             mensaje = input("Escribe el mensaje: ")
 
 
         elif opcion == "2":
-            celular = input("Ingresa tu número de celular: ")
+            celular = input("Ingresa tu numero de celular: ")
             remitente = input("Ingresa el nombre del remitente: ")
             mensaje = input("Escribe el mensaje recibido: ")
 
 
         elif opcion == "3":
-            numero = input("Ingresa el número al que deseas llamar: ")
+            numero = input("Ingresa el numero al que deseas llamar: ")
 
 
         elif opcion == "4":
@@ -63,9 +63,9 @@ def menu():
             break
 
         else:
-            print("Opción no válida. Inténtalo de nuevo.")
+            print("Opcion no valida. Intentalo de nuevo.")
 
-# Ejecutar el menú
+# Ejecutar el menu
 # menu()
 
 
@@ -74,7 +74,7 @@ def menu():
 #     def __init__(self) -> None:
 #         pass
 
-#     def gestionarLlamada(self, celular_origen, celular_destino,): #A este método se le debe alimentar un objeto de la clase Telemono, no celular
+#     def gestionarLlamada(self, celular_origen, celular_destino,): #A este metodo se le debe alimentar un objeto de la clase Telemono, no celular
 #         if self.verificarDisponibilidad(celular_origen):
 #             if self.verificarDisponibilidad(celular_destino) and celular_destino.disponible:
 #                 print(f"Estableciendo llamada entre {celular_origen.numero} y {celular_destino.numero}.")
@@ -93,8 +93,8 @@ def menu():
     # input("Presione Enter para prender el dispositivo:")
     # self.prenderApagar()
     ## HAY QUE ACTIVAR LA RED MOVIL!!
-    # clave = input("Ingrese la contraseña para desbloquear el dispositivo: ")
+    # clave = input("Ingrese la contrasenia para desbloquear el dispositivo: ")
     # while self.desbloquear(clave) == False:
-    #     clave = input("Ingrese la contraseña para desbloquear el dispositivo: ")
+    #     clave = input("Ingrese la contrasenia para desbloquear el dispositivo: ")
     # print("Dispositivo desbloqueado")
     # self.menu()

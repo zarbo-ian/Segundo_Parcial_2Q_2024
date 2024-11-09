@@ -19,8 +19,8 @@ class Central:
     def registrarDispositivo(self,numeroCelular): #hay que cambiar todo porque tiene que getear del diccionario las cosas
         if numeroCelular not in self.dispositivos_registrados:
             self.dispositivos_registrados.add(numeroCelular)
-            self.disponibilidadDispositivos[numeroCelular] = True
-            print(f"Teléfono numero registrado en la red.")
+            self.disponibilidadDispositivos[numeroCelular] = True #un celular esta disponible cunado no esta en llamada
+            print(f"Telefono numero registrado en la red.")
             try:
                 with open('telefonosRegistrados.csv','a',newline='') as archivo:
                     writer = csv.writer(archivo)
@@ -28,14 +28,14 @@ class Central:
             except: #FileNotFoundError('no se encontro el archivo de chats') as e:
                 print('Error, archivo de chats no encontrado ')  
         else:
-            raise KeyError(f"El teléfono {numeroCelular} ya está registrado.")
+            raise KeyError(f"El telefono {numeroCelular} ya esta registrado.")
         
     def eliminarDispositivo(self, numeroCelular):
         if numeroCelular in self.dispositivos_registrados:
             self.dispositivos_registrados.remove(numeroCelular)
-            print(f"Teléfono {numeroCelular} eliminado de la red.")
+            print(f"Telefono {numeroCelular} eliminado de la red.")
         else:
-            print(f"El teléfono {numeroCelular} no está registrado.")
+            print(f"El telefono {numeroCelular} no esta registrado.")
 
     def verificarDisponibilidad(self, numeroCelular): #determina si esta o no en llamada
         if self.disponibilidadDispositivos.get(numeroCelular):
@@ -45,38 +45,68 @@ class Central:
 
     def agregarContacto(self):
         pass
-
     
+    def gestionarLlamada(self,numeroOrigen,numeroDestino,duracion):
+        try:
+            with open('llamadas.csv','a',newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([str(numeroOrigen),str(numeroDestino),duracion])
+        except FileNotFoundError('No se encontro el archivo de historial de llamadas') as e:
+            print(e)
+    
+    def leerLlamadas(self,numeroOrigen):
+        llamadas = deque()
+        try:
+            with open('llamadas.csv', mode='r', newline='') as file:
+                reader = csv.reader(file)
+                for line in reader:
+                    if line:
+                        if line[0] == str(numeroOrigen):
+                                llamadas.append((line[0],line[1],line[2]))
+                        elif line[1] == str(numeroOrigen):
+                                llamadas.append((line[0],line[1],line[2]))
+            return llamadas
+        except Exception('archivo no encontrado') as e:
+            print(e)
 
-    # def gestionarLlamada(self,celular_origen,celular_destino): #necesita el id del celular y el numero de telefono
-    #     if self.verificarDisponibilidad(celular_origen):
-    #         if self.verificarDisponibilidad(celular_destino) and celular_destino.disponible:
-    #             print(f"Estableciendo llamada entre {celular_origen.numero} y {celular_destino.numero}.")
-    #             celular_destino.recibirLlamada(celular_origen.numero)
-    #         else:
-    #             print('El numero al que se esta intentando llamar no esta disponible')
-    #     else:
-    #         print('El celular intentando llamar esta ocupado')
-
-    def gestionarSms(self,numeroOrigen,numeroDestino,mensaje): #A este método se le debe alimentar un objeto de la clase SMS, no celular
+    def gestionarSms(self,numeroOrigen,numeroDestino,mensaje): #A este metodo se le debe alimentar un objeto de la clase SMS, no celular
         if numeroDestino == 11: #los celulares se pueden registrar mensajeando al 011
             try:
                 self.registrarDispositivo(numeroOrigen)
             except KeyError as e:
                 print(e)
-        else: #self.verificarRegistro(numeroOrigen): 
-            #if self.verificarRegistro(numeroDestino):
-            #print(f"Enviando mensaje desde {numeroOrigen.numero} a {numeroDestino.numero}.")
-            try:
-                with open('chats.csv','a',newline='') as file:
-                    writer = csv.writer(file)
-                    writer.writerow([str(numeroOrigen),str(numeroDestino),mensaje])
-            except: #FileNotFoundError('no se encontro el archivo de chats') as e:
-                print('Error, archivo de chats no encontrado ')
-            #else:
-                    #print("El celular al que quiere contactar no esta registrado")
-        #else:
-            #raise ValueError('El celular no esta registrado')
+        elif self.verificarRegistro(numeroOrigen): 
+            if self.verificarRegistro(numeroDestino):
+                print(f"Enviando mensaje desde {numeroOrigen.numero} a {numeroDestino.numero}.")
+                try:
+                    with open('chats.csv','a',newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([str(numeroOrigen),str(numeroDestino),mensaje])
+                except FileNotFoundError('no se encontro el archivo de chats') as e:
+                    print('Error, archivo de chats no encontrado ')
+            else:
+                    print("El celular al que quiere contactar no esta registrado")
+        else:
+            raise ValueError('El celular no esta registrado')
+
+    def eliminarSms(self,mensaje):
+        try:
+            rows = []
+            with open('chats.csv','r',newline='') as file:
+                reader = csv.reader(file)
+                header = next(reader)
+                rows.append(header)
+
+                for row in reader:
+                    if row[2] != mensaje:
+                        rows.append(row)
+                        
+            with open("chats.csv","w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerows(rows) 
+
+        except:
+            print('Error, archivo de chats no encontrado ')
     
     def leerSms(numeroOrigen):
         chats = dict()
@@ -104,7 +134,7 @@ class Central:
             print('error')
         
 
-    def gestionarMail(self, direccion_origen, direccion_destino, titulo, mensaje, escencial, abierto): #A este método se le debe alimentar un objeto de la clase Mail, no celular
+    def gestionarMail(self, direccion_origen, direccion_destino, titulo, mensaje, escencial, abierto): #A este metodo se le debe alimentar un objeto de la clase Mail, no celular
         #print(f"Mail enviado desde {direccion_origen.direccion} a {direccion_destino.direccion}.")
         try:
             with open("mails","w",newline="") as file:
@@ -152,9 +182,9 @@ class Central:
     
 
 
-# Verifica si los numeros estan registros
-    def verificarRegistro(self,numeroCelular): #pasar el get del numero de telefono si se tiene solo el numero
-        if numeroCelular in self.dispositivos_registrados:
-            return True
-        else:
-            return False
+
+def verificarRegistro(self,numeroCelular): #pasar el get del numero de telefono si se tiene solo el numero
+    if numeroCelular in self.dispositivos_registrados:
+        return True
+    else:
+        return False
