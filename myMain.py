@@ -1,10 +1,10 @@
 from celular import Celular
 import csv
-from random import randint
 from central import Central
 
 class Main:
     def __init__(self):
+        self.central=Central()
         # Diccionario para almacenar instancias de celulares cargados desde el CSV
         self.celulares = {}
         # Cargar los datos existentes del CSV al iniciar el programa
@@ -27,7 +27,7 @@ class Main:
                     acceder_id = input("Ingrese el ID del celular que desea acceder: ")
                     self.acceder_celular(acceder_id)
                 except:
-                    print("Ese celular no exist")
+                    print("Ese celular no existe")
             elif opcion == "3":
 
                 # Rescribe el csv en base a los celulares guardados en diccionario (los cuales estan actualizados)
@@ -35,8 +35,8 @@ class Main:
                     escritor=csv.writer(archivo)
                     escritor.writerow(['ID', 'Nombre', 'Modelo', 'OS', 'RAM', 'Almacenamiento','Numero', 'Prendido', 'Bloqueado', 'Contrasena','Correo', 'WiFi', 'Red Movil'])
                     for celular in self.celulares.values():
-                        escritor.writerow([celular.id,celular.nombre,celular.modelo,celular.OS,celular.RAM,celular.almacenamiento,celular.numero,celular.prendido,celular.bloqueado,celular.contraseña,celular.correo,celular.wifi,celular.redMovil])
-                        print(celular.id)
+                        escritor.writerow([celular.id,celular.central, celular.nombre,celular.modelo,celular.OS,celular.RAM,celular.almacenamiento,celular.numero,celular.prendido,celular.bloqueado,celular.contraseña,celular.correo,celular.wifi,celular.redMovil])
+                        print(celular.wifi)
 
                 print("Saliendo del programa.")
                 return
@@ -62,7 +62,7 @@ class Main:
 
         # Crear y guardar la instancia del celular
         nuevo_celular = Celular(
-            id,Central, nombre, modelo, OS, RAM, almacenamiento, numero, prendido, bloqueado, 
+            id, self.central, nombre, modelo, OS, RAM, almacenamiento, numero, prendido, bloqueado, 
             contraseña, correo, wifi, redMovil
         )
         nuevo_celular.guardar_en_csv()
@@ -77,18 +77,15 @@ class Main:
             escritor.writerow([self.id, self.nombre, self.modelo, self.OS, self.RAM, self.almacenamiento, self.numero, self.prendido, self.bloqueado, self.contraseña, self.correo, self.wifi, self.redMovil])
 
     def cargar_celulares_csv(self):
-        dictCelulares={}
         try:
             with open("celulares.csv",mode="r",newline='') as archivo:
                 lector=csv.reader(archivo)
                 next(lector)
                 for i in lector:
-                    celular = Celular(i[0], i[1], i[2], i[3], int(i[4]), int(i[5]), i[6], i[7] == "True", i[8] == "True", i[9], i[10], i[11] == "True", i[12] == "True")
+                    celular = Celular(i[0], self.central, i[1], i[2], i[3], int(i[4]), int(i[5]), i[6], i[7] == "True", i[8] == "True", i[9], i[10], i[11] == "True", i[12] == "True")
                     self.celulares[i[0]]=celular
         except:
             pass
-            print(dictCelulares)
-            print(self.celulares)
     
     def acceder_celular(self,id):
         celular=self.celulares.get(id)

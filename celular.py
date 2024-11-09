@@ -8,7 +8,7 @@ import csv
 
 class Celular:
     ids=set()
-    def __init__(self,central, id:int, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
+    def __init__(self, id:int, central, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contraseña: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
         self.id=id
         self.nombre=nombre
         self.modelo=modelo
@@ -16,7 +16,7 @@ class Celular:
         self.RAM=RAM #En GB
         self.almacenamiento=almacenamiento #En GB, almacenamiento de fabrica
         self.almacenamientodisp= self.almacenamiento #En GB, almacenamiento disponible para aplicaciones no esenciales
-        self.numero=numero
+        self.numero=None
         self.prendido=False
         self.bloqueado=True
         self.contraseña=contraseña
@@ -26,13 +26,14 @@ class Celular:
         #self.registrado = False #el celular no esta registrado en un principio
         self.chatMensajes={}
         self.central=central
+        self.contactos={}
 
-        self.sms=SMS('SMS',True,1,False,self.id,self.numero,self.central)
-        self.mail=Mail('Mail',True,1,False,self.correo)
-        self.configuracion=Configuracion('Configuracion',True,1,False)
-        self.appstore=AppStore('Appstore',True,1,False)
-        self.telefono = Telefono('Telefono',True,1,False)
-        self.contacto = Contacto('Contactos',True,1,False)
+        self.sms=SMS(self.central,'SMS',True,1,False,self.numero)
+        self.mail=Mail(self.central,'Mail',True,1,False,self.correo)
+        self.configuracion=Configuracion('Configuracion',Central(),True,1,False)
+        self.appstore=AppStore('Appstore',Central(),True,1,False)
+        self.telefono = Telefono('Telefono',Central(),True,1,False)
+        self.contacto = Contacto('Contactos',Central(),True,1,False)
         self.aplicaciones={'SMS':self.sms, 'Mail':self.mail, 'Configuracion':self.configuracion, 'Appstore':self.appstore,'Telefono': self.telefono} # Todas las aplicaciones del celular
        # self.central=central1 # Como hacemos que todos tengan la misma central??
         

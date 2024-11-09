@@ -3,13 +3,14 @@ import csv
 from collections import deque
 from central import *
 class Aplicacion:
-    def __init__(self, nombre:str, escencial:bool, espacio:int, abierto:bool):
+    def __init__(self,central, nombre:str, escencial:bool, espacio:int, abierto:bool):
         self.nombre=nombre
-        #Los escenciales no se pueden eliminar
+        #Las aplicaciones escenciales no se pueden eliminar
         self.escencial=escencial
         self.espacio=espacio
-        self.abierto = False
-
+        self.abierto = abierto
+        self.central = central
+        
 
     def abrirApp(self):
         if not self.abierto:
@@ -27,21 +28,45 @@ class Aplicacion:
         
 
 class Telefono(Aplicacion):
-    def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
-        super().__init__(nombre, escencial, espacio, abierto)
+    def __init__(self,central, nombre: str, escencial: bool, espacio: int, abierto: bool,numero:int):
+        super().__init__(central,nombre, escencial, espacio, abierto)
         self.ocupado = False
+        self.numero = numero
+        self.central = central
     
-    def llamar(self,otroTelefono):
+    def llamar(self,numeroOrigen,numeroDestino,mensaje):
         if self.ocupado == False:
-            if otroTelefono.ocupado == False:
+            if numeroDestino.ocupado == False:
                 self.ocupado = True    
                 input("Cuando quiera terminar la llamada oprima Enter:")
                 self.ocupado = False
-                otroTelefono.ocupado = False
+             #   otroTelefono.ocupado = False
             else:print('Este telefono no esta disponible')
         else:
-            raise ValueError('El telefono ya esta llamada')
+            raise ValueError('El telefono ya esta en llamada')
     
+    # def enviarMensaje(self,numeroOrigen,numeroDestino,mensaje):
+    #     if not numeroOrigen:
+    #         numeroValido = False
+    #         while not numeroValido:
+    #             try:
+    #                 numeroOrigen = int(input('ingrese un numero de celular'))
+    #                 numeroValido = True
+    #             except ValueError('ingrese un numero correcto, solo digitos del 0-9 y llame al 11') as e:
+    #                 print(e)
+    #             else:
+    #                 if numeroDestino != 11:
+    #                     numeroValido = False
+    #                     print('debe registrar su dispositivo enviando un mensaje al 11')
+    #     elif numeroDestino not in self.chats:
+    #         self.bandeja = deque()
+    #         self.bandeja.append((str(numeroOrigen),str(numeroDestino),mensaje))
+    #         self.chats[numeroDestino]= self.bandeja
+    #         self.central.gestionarSms(numeroOrigen,numeroDestino,mensaje)
+    #     else:
+    #         self.chats.get(numeroDestino).append((str(numeroOrigen),str(numeroDestino),mensaje))
+    #         self.central.gestionarSms(numeroOrigen,numeroDestino,numeroDestino,mensaje)
+    #     print(self.chats)
     def recibirLlamada(self, otroTelefono):
         self.ocupado = True
     
@@ -78,16 +103,15 @@ class Telefono(Aplicacion):
 
 # DiccionarioChats guarda en clave otros celulares y en value una tupla compuesta por (Quien mando el mensaje, mensaje)
 class SMS(Aplicacion): 
-    def __init__(self,central, nombre: str, escencial: bool, espacio: int, abierto: bool,id:int,numero:int,ocupado:bool=None):
-        super().__init__(nombre, escencial, espacio, abierto)
+    def __init__(self,central, nombre: str, escencial: bool, espacio: int, abierto: bool,numero:int):
+        super().__init__(central,nombre, escencial, espacio, abierto)
         self.escencial = escencial
-        self.chats=dict() #DEBERIA SER UNA PILA CON TUPLAS (NUMERO,MENSAJE)
+        self.chats=dict() #Diccionario de clave numero, valor pila (bandeja de entrada que contiene tuplas) 
         self.nombre = 'SMS'
-        self.id = id
         self.numero = numero
         self.central = central
     
-    def menuSMS(self,celular): #pasarle los datos necesarios telefono remitente etc
+    def menuSMS(self):
         continuar=True
         self.abrirApp()
     
@@ -101,7 +125,7 @@ class SMS(Aplicacion):
             if opcion== "1":
                 numero_destino = input("Ingresa el número de teléfono: ")
                 mensaje = input("Escribe el mensaje: ")
-                self.enviarMensaje(celular.id,self.numero,numero_destino,mensaje,self.central)
+                self.enviarMensaje(self.numero,numero_destino,mensaje,self.central)
                 
                 
             if opcion== "2":
@@ -111,12 +135,22 @@ class SMS(Aplicacion):
                 continuar=False
                 print("Has salido de mensajes")
                 self.cerrarApp()
-                self.cargarChats()
         #            self.central.verificarRegistroMensajes(celular_origen,numero_origen,numero_destino,mensaje)
 
     def enviarMensaje(self,numeroOrigen,numeroDestino,mensaje):
-        
-        if numeroDestino not in self.chats:
+        if not numeroOrigen:
+            numeroValido = False
+            while not numeroValido:
+                try:
+                    numeroOrigen = int(input('ingrese un numero de celular'))
+                    numeroValido = True
+                except ValueError('ingrese un numero correcto, solo digitos del 0-9 y llame al 11') as e:
+                    print(e)
+                else:
+                    if numeroDestino != 11:
+                        numeroValido = False
+                        print('debe registrar su dispositivo enviando un mensaje al 11')
+        elif numeroDestino not in self.chats:
             self.bandeja = deque()
             self.bandeja.append((str(numeroOrigen),str(numeroDestino),mensaje))
             self.chats[numeroDestino]= self.bandeja
@@ -160,35 +194,38 @@ class SMS(Aplicacion):
 # smsprueba.bajarChats()
 # print(smsprueba.chats)
 class Mail(Aplicacion):
-    def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool, direccion: str):
-        super().__init__(nombre, escencial, espacio, abierto)
+    def __init__(self,central, nombre: str, escencial: bool, espacio: int, abierto: bool, direccion: str):
+        super().__init__(central,nombre, escencial, espacio, abierto)
         self.nombre = 'Mail'
         self.lista_mails = []
         self.direccion = direccion
         self.recibidos_no_leidos = []
         self.recibidos_leidos =[]
         self.recibidos = []
-    
-    # def enviar_mail(self, direccion_origen, direccion_destino, mensaje):
-    #     self.lista_mails.insert(0,mensaje)
-    #     print(self.lista_mails)
+        self.central = central
 
-    def visualizar_mails_leidos(self):
-        try:
-            with open("mails.csv","r",newline="") as file:
-                reader = csv.reader(file)
-                for line in reader:
-                    if line[1] == self.direccion:
-                        if eval(line[5]) == False:
-                            self.recibidos_no_leidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
-                        else:
-                            self.recibidos_leidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
-                    else:
-                        self.recibidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
-
-        except Exception as e:
-            print(e)
+    # def visualizar_mails_leidos(self):
+    #     try:
+    #         with open("mails.csv","r",newline="") as file:
+    #             reader = csv.reader(file)
+    #             for line in reader:
+    #                 if line[1] == self.direccion:
+    #                     if eval(line[5]) == False:
+    #                         self.recibidos_no_leidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
+    #                     else:
+    #                         self.recibidos_leidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
+    #     except Exception as e:
+    #         print(e)
                 
+    # def visualizar_mails_tiempo(self):
+    #     try:
+    #         with open("mails.csv","r",newline="") as file:
+    #             reader = csv.reader(file)
+    #             for line in reader:
+    #                 if line[1] == self.direccion:
+    #                     self.recibidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
+    #     except Exception as e:
+    #         print(e)
 
     def redactar_mail(self,central):
         self.destinatario = input("Ingrese la direccion del destinatario: ")
@@ -206,7 +243,7 @@ class Mail(Aplicacion):
             else:
                 print("Opcion invalida")
             self.abierto = False
-            central.gesttionarMail(self.direccion,self.destinatario,self.titulo,self.mensaje,self.escencial,self.abierto)
+            self.central.gestionarMail(self.direccion,self.destinatario,self.titulo,self.mensaje,self.escencial,self.abierto)
 
     def menuMail(self, central):
         self.abrirApp()
@@ -223,45 +260,53 @@ class Mail(Aplicacion):
                 print("Ver mensajes según: \n1. No leídos primero\n2. Por fecha")
                 opcion = input("Elija una opcion: ")
                 if opcion == "1":
+                    self.recibidos_no_leidos, self.recibidos_leidos = self.central.visualizar_mails_leidos()
                     for i in self.recibidos_no_leidos:
                         print(i)
                     for i in self.recibidos_leidos:
                         print(i)
                 elif opcion == "2":
+                    self.recibidos = self.central.visualizar_mails_tiempo()
                     for i in self.recibidos:
                         print(i)
                 else:
                     print("Opcion inválida")
+            elif nav == "3":
+                continuar = False
+            else:
+                print("Opcion invalida")
 
         
 class Contacto(Aplicacion):
     def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
         super().__init__(nombre, escencial, espacio, abierto)
-        self.diccionario={}
+        self.contactos={}
         self.nombre = 'Contacto'
 
 # Agenda un contacto guardandolo en un diccionario mediante el numero y el nombre
-    def agendarContacto(self,numero,nombre):
-        if numero not in self.diccionario.keys():
-            self.diccionario[numero]=nombre
-        else:
-            print('No se puede agendar ese numero porque ya esta agendado, pruebe actualizando el contacto')
+    def agendarContacto(self,celular,numero,nombre):
+        if self.central.dispositivoRegistrado(numero):
+            if numero not in self.contactos.get:
+                self.contactos[celular].append((numero,nombre))
+                self.central.agregarContacto()
+            else:
+                print('No se puede agendar ese numero porque ya esta agendado, pruebe actualizando el contacto')
 
 # Actualiza el contacto y nombre en el diccionario
-    def actualizarContacto(self,numero,nombre):
-        if numero not in self.diccionario.keys():
+    def actualizarContacto(self,celular,numero,nombre):
+        if numero not in self.contactos[celular]:
             print("Ese numero no existe, intente agendarlo")
         else:
-            self.diccionario[numero]=nombre
+            self.contactos[celular].append((numero,nombre))
 
 # Elimina el contacto de diccionario
     def eliminarContacto(self,numero):
-        if numero not in self.diccionario.keys():
+        if numero not in self.contactos.keys():
             raise ValueError('Este numero no esta agendado')
         else:
-            self.diccionario.pop(numero)
+            self.contactos[celular].remove(numero)
 
-    def menuContacto(self):
+    def menuContacto(self,celular):
         self.abrirApp()
         continuar = True
         while continuar:
@@ -272,20 +317,30 @@ class Contacto(Aplicacion):
             print("4. Volver al menú anterior")
             nav = input("Elige una opcion: ")
             if nav == "1":
-                self.agendarContacto(input("Ingrese el número del contacto: "), input("Ingrese el nombre del contacto: "))
+                self.agendarContacto(celular,input("Ingrese el número del contacto: "), input("Ingrese el nombre del contacto: "))
             elif nav == "2":
-                self.actualizarContacto(input("Ingrese el número del contacto: "), input("Ingrese el nuevo nombre del contacto: "))
+                self.actualizarContacto(celular,input("Ingrese el número del contacto: "), input("Ingrese el nuevo nombre del contacto: "))
             elif nav == "3":
-                self.eliminarContacto(input("Ingrese el numero del contacto: "))
+                self.eliminarContacto(celular,input("Ingrese el numero del contacto: "))
             elif nav == "4":
                 continuar = False
+                try:
+                    with open('contactos.csv','a',newline='') as archivo:
+                        escritor=csv.writer(archivo)
+                        for celular,numero in self.contactos:
+                            escritor.writerow([celular,numero])
+                except FileNotFoundError:
+                    with open('contactos.csv','w',newline='') as archivo:
+                        escritor=csv.writer(archivo)
+                        escritor.writerow(["Celular","Numero agendado","Nombre"])
+                        escritor.writerow([celular,numero])
                 self.cerrarApp()
             else:
                 print("Opción inválida")
 
 class Configuracion(Aplicacion):
-    def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
-        super().__init__(nombre, escencial, espacio, abierto)
+    def __init__(self, nombre: str, central:object, escencial: bool, espacio: int, abierto: bool):
+        super().__init__(nombre, central, escencial, espacio, abierto)
         self.nombre = 'Configuracion'
 
     def cambiarNombreTelefono(self,celular):
@@ -293,17 +348,6 @@ class Configuracion(Aplicacion):
             nuevo_nombre = input("Ingrese el nuevo nombre del dispositivo: ")
             if nuevo_nombre.strip():  # Verifica que no esté vacío
                 celular.nombre = nuevo_nombre
-                filas=[]
-                with open('celulares.csv','r',newline='') as archivo:
-                    lector=csv.reader(archivo)
-                    for i in lector:
-                        if i[0]==celular.id:
-                            i[1]=nuevo_nombre
-                        filas.append(i)
-                with open('celulares.csv','w',newline='') as archivo:
-                    escritor=csv.writer(archivo)
-                    escritor.writerows(filas)
-
                 print(f"Nombre cambiado exitosamente a: {nuevo_nombre}")
             else:
                 print("Error: El nombre no puede estar vacío")
@@ -330,7 +374,7 @@ class Configuracion(Aplicacion):
         else:
             print("La red móvil ya está activa")
             
-    def desactivaRrRedMovil(self, celular, central):
+    def desactivarRedMovil(self, celular, central):
         if central.verificar_registro(self.id):
             if celular.redMovil:
                 celular.redMovil = False
@@ -370,7 +414,7 @@ class Configuracion(Aplicacion):
             if command == "1":
                 self.cambiarNombreTelefono(celular)
             elif command == "2":
-                self.codigoDesbloqueo(celular)
+                self.cambiarCodigoDesbloqueo(celular)
             elif command == "3":
                 if celular.redMovil:
                     print("La red movil ya está activada")

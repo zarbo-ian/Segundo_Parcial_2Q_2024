@@ -3,13 +3,30 @@ from collections import deque
 class Central:
     def __init__(self):
         self.dispositivos_registrados = set()  # Numeros de celular registrado
-                                            
-
+        self.disponibilidadDispositivos = dict() #Diccionario con clave celular,valor booleano True: Disponible False: Ocupado(en llamada)
+        self.bajarRegistrados()
+    
+    def bajarRegistrados(self):
+        try:
+            with open('telefonosRegistrados.csv','r',newline='') as archivo:
+                    lector=csv.reader(archivo)
+                    for i in lector:
+                        self.dispositivos_registrados.add(i)
+        except FileNotFoundError:
+            with open('telefonosRegistrados.csv','w',newline='') as archivo:
+                pass
+  
     def registrarDispositivo(self,numeroCelular): #hay que cambiar todo porque tiene que getear del diccionario las cosas
         if numeroCelular not in self.dispositivos_registrados:
             self.dispositivos_registrados.add(numeroCelular)
-            print(f"Teléfono numero  registrado en la red.")
-            
+            self.disponibilidadDispositivos[numeroCelular] = True
+            print(f"Teléfono numero registrado en la red.")
+            try:
+                with open('telefonosRegistrados.csv','a',newline='') as archivo:
+                    writer = csv.writer(archivo)
+                    writer.writerow([str(numeroCelular)])
+            except: #FileNotFoundError('no se encontro el archivo de chats') as e:
+                print('Error, archivo de chats no encontrado ')  
         else:
             raise KeyError(f"El teléfono {numeroCelular} ya está registrado.")
         
@@ -20,23 +37,26 @@ class Central:
         else:
             print(f"El teléfono {numeroCelular} no está registrado.")
 
-    def verificarDisponibilidad(self, celular):
-        if celular.numero in self.dispositivos_registrados: #and celular.prendido:
-            #print(f"El teléfono {celular.numero} está disponible.")
+    def verificarDisponibilidad(self, numeroCelular): #determina si esta o no en llamada
+        if self.disponibilidadDispositivos.get(numeroCelular):
             return True
         else:
-            print(f"El teléfono {celular.numero} no está disponible.")
             return False
 
-    def gestionarLlamada(self, idcelular_origen,celular_origen,idcelular_destino, celular_destino): #necesita el id del celular y el numero de telefono
-        if self.verificarDisponibilidad(celular_origen):
-            if self.verificarDisponibilidad(celular_destino) and celular_destino.disponible:
-                print(f"Estableciendo llamada entre {celular_origen.numero} y {celular_destino.numero}.")
-                celular_destino.recibirLlamada(celular_origen.numero)
-            else:
-                print('El numero al que se esta intentando llamar no esta disponible')
-        else:
-            print('El celular intentando llamar esta ocupado')
+    def agregarContacto(self):
+        pass
+
+    
+
+    # def gestionarLlamada(self,celular_origen,celular_destino): #necesita el id del celular y el numero de telefono
+    #     if self.verificarDisponibilidad(celular_origen):
+    #         if self.verificarDisponibilidad(celular_destino) and celular_destino.disponible:
+    #             print(f"Estableciendo llamada entre {celular_origen.numero} y {celular_destino.numero}.")
+    #             celular_destino.recibirLlamada(celular_origen.numero)
+    #         else:
+    #             print('El numero al que se esta intentando llamar no esta disponible')
+    #     else:
+    #         print('El celular intentando llamar esta ocupado')
 
     def gestionarSms(self,numeroOrigen,numeroDestino,mensaje): #A este método se le debe alimentar un objeto de la clase SMS, no celular
         if numeroDestino == 11: #los celulares se pueden registrar mensajeando al 011
@@ -93,6 +113,34 @@ class Central:
         except Exception as e:
             print(e)
 
+    def visualizar_mails_leidos(self):
+        recibidos_no_leidos = []
+        recibidos_leidos = []
+        try:
+            with open("mails.csv","r",newline="") as file:
+                reader = csv.reader(file)
+                for line in reader:
+                    if line[1] == self.direccion:
+                        if eval(line[5]) == False:
+                            recibidos_no_leidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
+                        else:
+                            recibidos_leidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
+            return recibidos_no_leidos, recibidos_leidos
+        except Exception as e:
+            print(e)
+                
+    def visualizar_mails_tiempo(self):
+        recibidos = []
+        try:
+            with open("mails.csv","r",newline="") as file:
+                reader = csv.reader(file)
+                for line in reader:
+                    if line[1] == self.direccion:
+                        recibidos.insert(0,(line[0],line[2],line[3],line[4],line[5]))
+            return recibidos
+        except Exception as e:
+            print(e)
+
 # Verifica si amprint("Error")numeros estan registrados
     def verificarRegistroMensajes(self,celular_origen,numero_origen,numero_destino,mensaje):
         if numero_origen in self.dispositivos_registrados:
@@ -101,11 +149,12 @@ class Central:
         else:
             print(f"El numero {numero_destino} no esta registrado")
             return False
-        
+    
+
 
 # Verifica si los numeros estan registros
-    def verificarRegistro(self,idCelular): #pasar el get del numero de telefono si se tiene solo el numero
-        if idCelular in self.dispositivos_registrados:
+    def verificarRegistro(self,numeroCelular): #pasar el get del numero de telefono si se tiene solo el numero
+        if numeroCelular in self.dispositivos_registrados:
             return True
         else:
             return False
