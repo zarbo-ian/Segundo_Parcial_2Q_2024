@@ -4,7 +4,7 @@ from collections import deque
 from central import *
 import time
 class Aplicacion:
-    def __init__(self,central, nombre:str, espacio:int, abierto:bool):
+    def __init__(self, central, nombre:str, espacio:int, abierto:bool):
         self.nombre=nombre
         #Las aplicaciones escenciales no se pueden eliminar
         self.espacio=espacio
@@ -28,8 +28,8 @@ class Aplicacion:
         
 
 class Telefono(Aplicacion):
-    def __init__(self,central, nombre: str, escencial: bool, espacio: int, abierto: bool,numero:int):
-        super().__init__(central,nombre, escencial, espacio, abierto)
+    def __init__(self, central, nombre: str, escencial: bool, espacio: int, abierto: bool,numero:int):
+        super().__init__(central,nombre, espacio, abierto)
         self.ocupado = False
         self.numero = numero
         self.central = central
@@ -98,10 +98,11 @@ class Telefono(Aplicacion):
             else:
                 print("Opcion invalida. Intente de nuevo.")
 
+
 # DiccionarioChats guarda en clave otros celulares y en value una tupla compuesta por (Quien mando el mensaje, mensaje)
 class SMS(Aplicacion): 
-    def __init__(self,central, nombre: str, escencial: bool, espacio: int, abierto: bool,numero:int):
-        super().__init__(central,nombre, escencial, espacio, abierto)
+    def __init__(self, central, nombre: str, escencial: bool, espacio: int, abierto: bool,numero:int):
+        super().__init__(central, nombre, espacio, abierto)
         self.escencial = escencial
         self.chats=dict() #Diccionario de clave numero, valor pila (bandeja de entrada que contiene tuplas) 
         self.nombre = 'SMS'
@@ -165,7 +166,6 @@ class SMS(Aplicacion):
             while self.bandejaCopia:
                 print(self.bandejaCopia.pop())
 
-        
 
 # central1 = Central()
 # smsprueba = SMS('SMS',True,50,True,50,50300,False)
@@ -173,8 +173,8 @@ class SMS(Aplicacion):
 # smsprueba.bajarChats()
 # print(smsprueba.chats)
 class Mail(Aplicacion):
-    def __init__(self,central, nombre: str, escencial: bool, espacio: int, abierto: bool, direccion: str):
-        super().__init__(central,nombre, escencial, espacio, abierto)
+    def __init__(self, central, nombre: str, escencial: bool, espacio: int, abierto: bool, direccion: str):
+        super().__init__(central, nombre, espacio, abierto)
         self.nombre = 'Mail'
         self.lista_mails = []
         self.direccion = direccion
@@ -318,8 +318,8 @@ class Contacto(Aplicacion):
                 print("Opcion invalida")
 
 class Configuracion(Aplicacion):
-    def __init__(self, nombre: str, central:object, escencial: bool, espacio: int, abierto: bool):
-        super().__init__(nombre, central, escencial, espacio, abierto)
+    def __init__(self, central:object, nombre: str, escencial: bool, espacio: int, abierto: bool):
+        super().__init__(nombre, central, espacio, abierto)
         self.nombre = 'Configuracion'
 
     def cambiarNombreTelefono(self,celular):
@@ -395,22 +395,22 @@ class Configuracion(Aplicacion):
             elif command == "2":
                 self.cambiarCodigoDesbloqueo(celular)
             elif command == "3":
-                if celular.redMovil:
+                if celular.redMovil==True:
                     print("La red movil ya esta activada")
                 else:
                     self.activarRedMovil(celular)
             elif command == "4":
-                if celular.redMovil:
+                if celular.redMovil==True:
                     self.desactivarRedMovil(celular)
                 else:
                     print("La red movil ya esta desactivada")
             elif command == "5":
-                if celular.wifi:
+                if celular.wifi==True:
                     print("El wifi ya esta activado")
                 else:
                     self.activarWifi(celular)
             elif command == "6":
-                if celular.wifi:
+                if celular.wifi==True:
                     self.desactivarWifi(celular)
                 else:
                     print("El wifi ya esta desactivado")
@@ -421,8 +421,10 @@ class Configuracion(Aplicacion):
         
 
 class AppStore(Aplicacion):
-    def __init__(self, nombre: str, escencial: bool, espacio: int, abierto: bool):
-        super().__init__(nombre, escencial, espacio, abierto)
+    def __init__(self, central, nombre: str, escencial: bool, espacio: int, abierto: bool):
+        super().__init__(nombre, central, espacio, abierto)
+        self.escencial=escencial
+        
     def descargarAplicacion(self,celular,app):
         if app not in celular.aplicaciones:
             celular.aplicaciones.add(app)

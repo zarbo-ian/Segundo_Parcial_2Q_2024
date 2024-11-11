@@ -7,9 +7,12 @@ import csv
 
 class Celular:
     ids=set()
-    def __init__(self, id:int, central, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contrasenia: int, correo:str,wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
+    def __init__(self, central:object, id:str, nombre:str, modelo:str, OS:str, RAM:int, almacenamiento:int, numero:int, prendido:bool, bloqueado:bool, contrasenia: str, correo:str, wifi:bool, redMovil:bool, ocupado:bool=False, chatMensajes:list = None):
         self.id=id
+        self.central=central
+        print(self.central)
         self.nombre=nombre
+        print(self.nombre)
         self.modelo=modelo
         self.OS=OS
         self.RAM=RAM #En GB
@@ -24,18 +27,16 @@ class Celular:
         self.redMovil=False
         #self.registrado = False #el celular no esta registrado en un principio
         self.chatMensajes={}
-        self.central=central
         self.contactos={}
 
-        self.sms=SMS(self.central,'SMS',1,False,self.numero)
-        self.mail=Mail(self.central,'Mail',1,False,self.correo)
-        self.configuracion=Configuracion('Configuracion',Central(),True,1,False) #en realidad deberian instanciarse con la misma central
-        self.appstore=AppStore('Appstore',Central(),1,False)
-        self.telefono = Telefono('Telefono',Central(),1,False)
-        self.contacto = Contacto('Contactos',Central(),1,False)
-        self.aplicaciones={'SMS':self.sms, 'Mail':self.mail, 'Configuracion':self.configuracion, 'Appstore':self.appstore,'Telefono': self.telefono} # Todas las aplicaciones del celular
-
         
+        self.sms=SMS(self.central,'SMS', True, 1, False, self.numero)
+        self.mail=Mail(self.central,'Mail',True, 1, False, self.correo)
+        self.configuracion=Configuracion(self.central,'Configuracion',True,1,False) #en realidad deberian instanciarse con la misma central
+        self.appstore=AppStore(self.central,'Appstore',True, 1,False)
+        self.telefono = Telefono(self.central,'Telefono',True, 1,False, self.numero)
+        self.contacto = Contacto(self.central, 'Contactos',1,False)
+        self.aplicaciones={'SMS':self.sms, 'Mail':self.mail, 'Configuracion':self.configuracion, 'Appstore':self.appstore,'Telefono': self.telefono} # Todas las aplicaciones del celular
 
     def guardar_en_csv(self):
         # Definir el nombre del archivo CSV
@@ -102,6 +103,7 @@ class Celular:
                     permiso_aplicaciones=False
 
                     while intento_contrasenia:
+                        print(self.contrasenia)
                         contrasenia_puesta=input("Escriba su contrasenia o toque ENTER para salir")
                         if contrasenia_puesta=="":
                             intento_contrasenia=False
@@ -179,7 +181,7 @@ class Celular:
         if id not in Celular.ids:
             Celular.ids.add(id)
         else:
-            raise ValueError('No puede usar un id existente')
+            1
 
 
     # def registrar(self):

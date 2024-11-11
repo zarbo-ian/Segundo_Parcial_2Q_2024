@@ -29,13 +29,13 @@ class Main:
                 except:
                     print("Ese celular no existe")
             elif opcion == "3":
-
                 # Rescribe el csv en base a los celulares guardados en diccionario (los cuales estan actualizados)
                 with open('celulares.csv','w',newline='') as archivo:
                     escritor=csv.writer(archivo)
                     escritor.writerow(['ID', 'Nombre', 'Modelo', 'OS', 'RAM', 'Almacenamiento','Numero', 'Prendido', 'Bloqueado', 'Contrasena','Correo', 'WiFi', 'Red Movil'])
                     for celular in self.celulares.values():
-                        escritor.writerow([celular.id,celular.central, celular.nombre,celular.modelo,celular.OS,celular.RAM,celular.almacenamiento,celular.numero,celular.prendido,celular.bloqueado,celular.contrasenia,celular.correo,celular.wifi,celular.redMovil])
+                        print(self.redMovil)
+                        escritor.writerow([celular.id, celular.nombre,celular.modelo,celular.OS,celular.RAM,celular.almacenamiento,celular.numero, celular.prendido,celular.bloqueado,celular.contrasenia,celular.correo,celular.wifi,celular.redMovil])
                         print(celular.wifi)
 
                 print("Saliendo del programa.")
@@ -48,6 +48,7 @@ class Main:
         id = input("ID: ")
         Celular.validarId(id)
         nombre = input("Ingrese el nombre del celular: ")
+        print(nombre)
         modelo = input("Ingrese el modelo del celular: ")
         OS = input("Ingrese el sistema operativo (OS): ")
         RAM = int(input("Ingrese la RAM en GB: "))
@@ -59,17 +60,31 @@ class Main:
         correo = input("Ingrese el correo electronico asociado: ")
         wifi = False
         redMovil = True
-
+        central=self.central
         # Crear y guardar la instancia del celular
         nuevo_celular = Celular(
-            id, self.central, nombre, modelo, OS, RAM, almacenamiento, numero, prendido, bloqueado, 
-            contrasenia, correo, wifi, redMovil
-        )
+            central=central,
+            id=id, 
+            nombre=nombre, 
+            modelo=modelo, 
+            OS=OS, 
+            RAM=RAM, 
+            almacenamiento=almacenamiento, 
+            numero=numero, 
+            prendido=prendido, 
+            bloqueado=bloqueado, 
+            contrasenia=contrasenia, 
+            correo=correo, 
+            wifi=wifi, 
+            redMovil=redMovil
+            )
+        
         nuevo_celular.guardar_en_csv()
         self.celulares[id] = nuevo_celular
         print("Celular aniadido y guardado en CSV.")
     
     def guardar_en_csv(self):
+        print(self.nombre)
         with open("celulares.csv",mode="a",newline='') as  archivo:
             escritor=csv.writer(archivo)
             if archivo.tell() == 0:  # Verifica si el archivo esta vacio
@@ -82,7 +97,7 @@ class Main:
                 lector=csv.reader(archivo)
                 next(lector)
                 for i in lector:
-                    celular = Celular(i[0], self.central, i[1], i[2], i[3], int(i[4]), int(i[5]), i[6], i[7] == "True", i[8] == "True", i[9], i[10], i[11] == "True", i[12] == "True")
+                    celular = Celular(self.central, i[0], i[1], i[2], i[3], int(i[4]), int(i[5]), i[6], i[7] == "True", i[8] == "True", i[9], i[10], i[11] == "True", i[12] == "True")
                     self.celulares[i[0]]=celular
         except:
             pass
